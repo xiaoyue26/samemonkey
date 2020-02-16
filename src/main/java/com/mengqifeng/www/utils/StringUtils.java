@@ -18,11 +18,13 @@ public class StringUtils {
         return result;
     }
 
-
     public static void main(String[] args) {
         String data = "a\00126";
         String[] words = StringUtils.split(data, '\001');
         for (String word : words) {
+            System.out.println(word);
+        }
+        for (String word : args) {
             System.out.println(word);
         }
     }
