@@ -1,0 +1,12 @@
+.idea
+build
+.DS_Store
+out
+*.out
+target/
+gradle/
+gradlew*
+.gradle/
+*.iml
+gradle.properties
+hikaricp.properties
