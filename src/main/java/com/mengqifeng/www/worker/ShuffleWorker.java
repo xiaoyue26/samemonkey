@@ -1,8 +1,6 @@
 package com.mengqifeng.www.worker;
 
 import com.mengqifeng.www.logic.WorkerParam;
-import com.mengqifeng.www.utils.BloomFilter;
-import com.mengqifeng.www.utils.FileUtils;
 import com.mengqifeng.www.utils.Logger;
 import com.mengqifeng.www.utils.StringUtils;
 
@@ -142,8 +140,9 @@ public class ShuffleWorker implements IWorker {
         for (int i = 0; i < bucketNum; i++) {
             logger.info("begin merge tmp_%d:", i);
             // 1. open tmp1-i build bloom+hashMap by tmp1
-            final BloomFilter blf = new BloomFilter();
-            final Map<String, List<Long>> map = new HashMap<>();
+            // final StringBloomFilter blf = new StringBloomFilter();
+            final Map<String, List<Long>> map = new HashMap<>(
+                    5661649);
             Path tmpPath;
             tmpPath = Paths.get(tmpPath1.toString()
                     , String.valueOf(i) + tmpPostFix);
@@ -157,13 +156,15 @@ public class ShuffleWorker implements IWorker {
                     } else {
                         old.add(Long.valueOf(words[1]));
                     }
-                    blf.add(words[0]);
+                    // blf.add(words[0]);
                 });
             } catch (IOException e) {
                 e.printStackTrace();
             }
             // 2. delete tmp1
             tmpPath.toFile().delete();
+            logger.info("build tmp1-%d info ok", i);
+            logger.info("tmp1-%d hashmap size: %d", i, map.size());
             // 3. open tmp2-i, write out-i
             tmpPath = Paths.get(tmpPath2.toString()
                     , String.valueOf(i) + tmpPostFix);
@@ -176,19 +177,19 @@ public class ShuffleWorker implements IWorker {
             ) {
                 lines.forEach(lineWithIndex -> {
                     String[] words = StringUtils.split(lineWithIndex, '\001');
-                    if (blf.contains(words[0])) {
-                        List<Long> old = map.getOrDefault(words[0], null);
-                        if (old != null) {
-                            for (Long index : old) {
-                                out.write(words[0] + "\001" + index + "\001" + words[1] + '\n');
-                            }
+                    // if (blf.contains(words[0])) {
+                    List<Long> old = map.getOrDefault(words[0], null);
+                    if (old != null) {
+                        for (Long index : old) {
+                            out.write(words[0] + "\001" + index + "\001" + words[1] + '\n');
                         }
                     }
+                    // }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                map.clear();
+                // map = null;
                 tmpPath.toFile().delete();
             }
             // 4. close file
@@ -200,7 +201,7 @@ public class ShuffleWorker implements IWorker {
                 , resFileName).toFile(), true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
-             // mergeFiles(out);
+            // mergeFiles(out);
         } catch (IOException e) {
             e.printStackTrace();
         }

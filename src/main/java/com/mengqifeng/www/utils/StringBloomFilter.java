@@ -2,14 +2,14 @@ package com.mengqifeng.www.utils;
 
 import java.util.BitSet;
 
-public class BloomFilter {
+public class StringBloomFilter {
     private static final int DEFAULT_SIZE = 2 << 24;
     private static final int[] seeds = new int[]{7, 11, 13, 31, 37, 61,};
 
     private final BitSet bits;
     private final SimpleHash[] func;
 
-    public BloomFilter() {
+    public StringBloomFilter() {
         bits = new BitSet(DEFAULT_SIZE);
         func = new SimpleHash[seeds.length];
         for (int i = 0; i < seeds.length; i++) {

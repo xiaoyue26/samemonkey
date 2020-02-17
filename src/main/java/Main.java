@@ -21,6 +21,8 @@ public class Main {
         // 6. clear资源:
         long end = System.nanoTime();
         logger.info("运行时间: %fs", (double) (end - start) / 1000000000);
-        // 运行时间: 2769.734857601s
+        // 运行时间: 2769.734857601s hashmap+bloom+全重复
+        // 运行时间: 2483.774556s hashmap+全重复
+
     }
 }
