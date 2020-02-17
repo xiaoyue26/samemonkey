@@ -1,7 +1,8 @@
 package com.mengqifeng.www.worker;
 
-import com.mengqifeng.www.logic.WorkerParam;
+import com.mengqifeng.www.logic.ConsoleParam;
 import com.mengqifeng.www.utils.Logger;
+import com.mengqifeng.www.utils.SizeUtils;
 import com.mengqifeng.www.utils.StringUtils;
 
 import java.io.BufferedWriter;
@@ -38,7 +39,7 @@ public class ShuffleWorker implements IWorker {
     private static final Logger logger = new Logger();
 
 
-    public ShuffleWorker(WorkerParam param) {
+    public ShuffleWorker(ConsoleParam param) {
         epoch = String.valueOf(System.currentTimeMillis()); // TODO 打开
         // epoch = "1581843611465";
         tmpPath1 = Paths.get(param.tmpDir, epoch, "1");
@@ -47,27 +48,15 @@ public class ShuffleWorker implements IWorker {
         this.inFile1 = Paths.get(param.inFile1);
         this.inFile2 = Paths.get(param.inFile2);
         // 计算bucket数量:
-        bucketNum = getBucketNum();
+        bucketNum = getBucketNum(param.splitSize);
         bucketMask = bucketNum - 1;
         init_dirs(); // TODO 打开
     }
 
-    static final int MAXIMUM_CAPACITY = 1 << 30;
-
-    static final int tableSizeFor(int cap) {
-        int n = cap - 1;
-        n |= n >>> 1;
-        n |= n >>> 2;
-        n |= n >>> 4;
-        n |= n >>> 8;
-        n |= n >>> 16;
-        return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
-    }
-
-    private int getBucketNum() {
+    private int getBucketNum(int splitSize) {
         long sumSize = inFile1.toFile().length()
                 + inFile2.toFile().length();
-        return tableSizeFor((int) (sumSize / 1024 / 1024 / 128));
+        return SizeUtils.tableSizeFor((int) (sumSize / splitSize));
     }
 
     /**
@@ -141,8 +130,7 @@ public class ShuffleWorker implements IWorker {
             logger.info("begin merge tmp_%d:", i);
             // 1. open tmp1-i build bloom+hashMap by tmp1
             // final StringBloomFilter blf = new StringBloomFilter();
-            final Map<String, List<Long>> map = new HashMap<>(
-                    5661649);
+            final Map<String, List<Long>> map = new HashMap<>();
             Path tmpPath;
             tmpPath = Paths.get(tmpPath1.toString()
                     , String.valueOf(i) + tmpPostFix);
