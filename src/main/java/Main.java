@@ -1,16 +1,18 @@
 import com.mengqifeng.www.logic.ConsoleParam;
+import com.mengqifeng.www.utils.FileUtils;
 import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
 import com.mengqifeng.www.worker.IWorker;
-import com.mengqifeng.www.worker.ShuffleWorker;
 import com.mengqifeng.www.worker.WorkerFactory;
 
+import java.io.File;
 import java.io.IOException;
 
 public class Main {
     private static final Logger logger = LogFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException {
+        FileUtils.deleteDirectory(new File("D:/work/out"));
         long start = System.nanoTime();
         // 1. 获得环境参数:
         // 2. 读取输入的文件路径配置、参数:

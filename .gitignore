@@ -10,3 +10,4 @@ gradlew*
 *.iml
 gradle.properties
 hikaricp.properties
+*.txt
