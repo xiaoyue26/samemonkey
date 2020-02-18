@@ -16,7 +16,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class FileReader {
+public class MmapTest {
 
     static class MappedBiggerFileReader {
         private final MappedByteBuffer[] mappedBuffer;

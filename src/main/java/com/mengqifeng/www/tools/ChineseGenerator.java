@@ -2,7 +2,7 @@ package com.mengqifeng.www.tools;
 
 import java.util.Random;
 
-public class ChineseGenerator {
+public class ChineseGenerator implements ICharGenerator {
     private final Random random;
     private final char begin = '\u4e00';
     private final char end = '\u9fa5';
@@ -16,17 +16,8 @@ public class ChineseGenerator {
         return (char) (begin + random.nextInt(randomBound));
     }
 
-    public final int fillRandomLine(char[] buf) {
-        if (buf == null || buf.length < 2) {
-            return 0;
-        }
-        int curLen = buf.length / 2
-                + random.nextInt(buf.length / 2);
-        for (int i = 0; i < curLen - 1; i++) {
-            buf[i] = getRandomChar();
-        }
-        buf[curLen - 1] = '\n';
-        return curLen;
+    public final int nextInt(int bound) {
+        return random.nextInt(bound);
     }
 
     public static void main(String[] args) {
