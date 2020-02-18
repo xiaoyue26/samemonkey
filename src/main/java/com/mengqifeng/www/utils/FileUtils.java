@@ -12,4 +12,10 @@ public class FileUtils {
         }
         return directoryToBeDeleted.delete();
     }
+
+    public static void main(String[]args){
+        // FileRegion region = new DefaultFileRegion(new File(fileName),0,1000);
+
+
+    }
 }

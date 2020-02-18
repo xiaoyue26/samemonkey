@@ -1,3 +1,4 @@
+package com.mengqifeng.www.tools;
 
 import sun.misc.Cleaner;
 
@@ -11,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class FileReader {
@@ -122,6 +125,7 @@ public class FileReader {
             for (String line = in.readLine(); line != null; line = in.readLine()) {
                 count++;
             }*/
+
             String bigStr = new String(buf, StandardCharsets.UTF_8);
             for (int i = 0; i < bigStr.length(); i++) {
                 if (bigStr.charAt(i) == '\n') {
@@ -152,6 +156,7 @@ public class FileReader {
     }
 
     public static void main(String[] args) throws IOException {
-        test1();
+        // test1();
+        test2();
     }
 }

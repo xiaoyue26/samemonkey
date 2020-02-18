@@ -1,5 +1,8 @@
 package com.mengqifeng.www.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class StringUtils {
     public static String[] split(String data, char sep) {
         CharSequence[] temp = new CharSequence[(data.length() / 2) + 1];
@@ -27,5 +30,7 @@ public class StringUtils {
         for (String word : args) {
             System.out.println(word);
         }
+        Map<Integer,Integer> map=new HashMap<>();
+        System.out.println(map.get(1));
     }
 }

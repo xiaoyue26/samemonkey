@@ -2,6 +2,7 @@ package com.mengqifeng.www.worker;
 
 import com.mengqifeng.www.logic.ConsoleParam;
 import com.mengqifeng.www.utils.Logger;
+import com.mengqifeng.www.utils.OpenHashMap;
 import com.mengqifeng.www.utils.SizeUtils;
 import com.mengqifeng.www.utils.StringUtils;
 
@@ -131,6 +132,7 @@ public class ShuffleWorker implements IWorker {
             // 1. open tmp1-i build bloom+hashMap by tmp1
             // final StringBloomFilter blf = new StringBloomFilter();
             final Map<String, List<Long>> map = new HashMap<>();
+            // final Map<String, List<Long>> map = new OpenHashMap<>();
             Path tmpPath;
             tmpPath = Paths.get(tmpPath1.toString()
                     , String.valueOf(i) + tmpPostFix);
@@ -138,7 +140,7 @@ public class ShuffleWorker implements IWorker {
 
                 lines.forEach(lineWithIndex -> {
                     String[] words = StringUtils.split(lineWithIndex, '\001');
-                    List<Long> old = map.getOrDefault(words[0], null);
+                    List<Long> old = map.get(words[0]);
                     if (old == null) {
                         map.put(words[0], Arrays.asList(Long.valueOf(words[1])));
                     } else {
