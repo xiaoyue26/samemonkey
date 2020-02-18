@@ -1,12 +1,14 @@
 import com.mengqifeng.www.logic.ConsoleParam;
+import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
 import com.mengqifeng.www.worker.IWorker;
 import com.mengqifeng.www.worker.ShuffleWorker;
+import com.mengqifeng.www.worker.WorkerFactory;
 
 import java.io.IOException;
 
 public class Main {
-    private static final Logger logger = new Logger();
+    private static final Logger logger = LogFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException {
         long start = System.nanoTime();
@@ -16,7 +18,7 @@ public class Main {
         // 3. 采样文件n个块,生成采样结果:
         // 4. 根据上述结果,选择执行计划:
         // 5. 执行选择的方法:
-        IWorker worker = new ShuffleWorker(param);
+        IWorker worker = WorkerFactory.createShuffleWorker(param);
         worker.run();
         // 6. clear资源:
         long end = System.nanoTime();

@@ -1,10 +1,7 @@
 package com.mengqifeng.www.worker;
 
 import com.mengqifeng.www.logic.ConsoleParam;
-import com.mengqifeng.www.utils.Logger;
-import com.mengqifeng.www.utils.OpenHashMap;
-import com.mengqifeng.www.utils.SizeUtils;
-import com.mengqifeng.www.utils.StringUtils;
+import com.mengqifeng.www.utils.*;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -37,7 +34,7 @@ public class ShuffleWorker implements IWorker {
     private final int bucketMask;
     private final String tmpPostFix = ".txt";
     private final String resFileName = "res.txt";
-    private static final Logger logger = new Logger();
+    private final Logger logger = LogFactory.getLogger(this.getClass());
 
 
     public ShuffleWorker(ConsoleParam param) {
