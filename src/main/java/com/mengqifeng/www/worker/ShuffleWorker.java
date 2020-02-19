@@ -1,7 +1,7 @@
 package com.mengqifeng.www.worker;
 
-import com.google.common.hash.BloomFilter;
-import com.google.common.hash.Funnels;
+// import com.google.common.hash.BloomFilter;
+//import com.google.common.hash.Funnels;
 import com.mengqifeng.www.logic.ConsoleParam;
 import com.mengqifeng.www.utils.*;
 
@@ -146,9 +146,9 @@ public class ShuffleWorker implements IWorker {
             logger.debug("begin merge tmp_%d:", i);
             // 1. open tmp1-i build bloom+hashMap by tmp1
             // final StringBloomFilter blf = new StringBloomFilter();
-            final BloomFilter<String> blf = BloomFilter.create(
+            /*final BloomFilter<String> blf = BloomFilter.create(
                     Funnels.stringFunnel(StandardCharsets.UTF_8)
-                    , guessLineNum());
+                    , guessLineNum());*/
             logger.debug("guessLineNum(): %d", guessLineNum());
             final Map<String, List<Long>> map = new HashMap<>();
             // final Map<String, List<Long>> map = new OpenHashMap<>();
@@ -161,7 +161,7 @@ public class ShuffleWorker implements IWorker {
                 lines.forEach(lineWithIndex -> {
                     String[] words = StringUtils.split(lineWithIndex, '\001');
                     List<Long> old = map.get(words[0]);
-                    blf.put(words[0]);// TODO remove
+                    // blf.put(words[0]);// TODO remove
                     if (old == null) {
                         map.put(words[0], Arrays.asList(Long.valueOf(words[1])));
                     } else {
@@ -188,7 +188,7 @@ public class ShuffleWorker implements IWorker {
             ) {
                 lines.forEach(lineWithIndex -> {
                     String[] words = StringUtils.split(lineWithIndex, '\001');
-                    if (blf.mightContain(words[0])) {// todo remove
+                    // if (blf.mightContain(words[0])) {// todo remove
                         // if (blf.contains(words[0])) {// todo remove
                         List<Long> old = map.get(words[0]);
                         if (old != null) {
@@ -196,7 +196,7 @@ public class ShuffleWorker implements IWorker {
                                 out.write(words[0] + "\001" + index + "\001" + words[1] + '\n');
                             }
                         }
-                    }
+                    // }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
