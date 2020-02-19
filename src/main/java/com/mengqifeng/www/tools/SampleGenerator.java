@@ -18,12 +18,14 @@ import java.util.stream.Stream;
 
 public class SampleGenerator {
     private final Logger logger = LogFactory.getLogger(this.getClass());
+
     public void genSampleLikeDict(Path targetPath
             , long maxLines, final int maxLineLen
             , Path... dictPaths) {
         ICharGenerator gener = Generators.createReorderGen(dictPaths);
         genSample(targetPath, maxLines, maxLineLen, gener);
     }
+
     @SuppressWarnings("Duplicates")
     public void genSampleFromDict(Path targetPath
             , long maxLines, final int maxLineLen
@@ -86,16 +88,17 @@ public class SampleGenerator {
         // 随机中文 50000000 line => 10.3G 770s
         // 纯数字: 614090872 line => 6.6G 2000s
         // 同频中文 50000000 line => 10.3G 696s
-        long maxLines = 50 * 1000 * 1000;
+        // 同频中文 20000000 line =>  4.2G
         final int maxLineLen = 101;
         /*sgen.genSample(Paths.get("D:/work/old/sample1.txt")
                 , maxLines, maxLineLen);
         sgen.genSample(Paths.get("D:/work/old/sample2.txt")
                 , maxLines, maxLineLen);*/
-        Path dictPath1 = Paths.get("D:/work/samemonkey/src/main/resources/Journey to the West.txt");
-        Path dictPath2 = Paths.get("D:/work/samemonkey/src/main/resources/red floor dream.txt");
-        sgen.genSampleLikeDict(Paths.get("D:/work/old/sample3.txt")
+        Path target = Paths.get(args[0]); // 结果路径
+        long maxLines = Long.valueOf(args[1]);//50 * 1000 * 1000;
+        Path dictPath1 = Paths.get(args[2]);// 字典1的路径
+        sgen.genSampleLikeDict(target
                 , maxLines, maxLineLen
-                , dictPath1, dictPath2);
+                , dictPath1);
     }
 }

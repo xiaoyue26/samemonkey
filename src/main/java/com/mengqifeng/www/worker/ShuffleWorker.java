@@ -1,5 +1,7 @@
 package com.mengqifeng.www.worker;
 
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnels;
 import com.mengqifeng.www.logic.ConsoleParam;
 import com.mengqifeng.www.utils.*;
 
@@ -7,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,15 +41,24 @@ public class ShuffleWorker implements IWorker {
 
 
     public ShuffleWorker(ConsoleParam param) {
-        epoch = String.valueOf(System.currentTimeMillis()); // TODO 打开
+        epoch = String.valueOf(System.currentTimeMillis());
         // epoch = "1581843611465";
         tmpPath1 = Paths.get(param.tmpDir, epoch, "1");
         tmpPath2 = Paths.get(param.tmpDir, epoch, "2");
         outPath = Paths.get(param.outDir, epoch);
-        this.inFile1 = Paths.get(param.inFile1);
-        this.inFile2 = Paths.get(param.inFile2);
+        Path t1 = Paths.get(param.inFile1);
+        Path t2 = Paths.get(param.inFile2);
+        if (t1.toFile().length()
+                > t2.toFile().length()) { // 确保小的文件在前面:
+            this.inFile1 = t2;
+            this.inFile2 = t1;
+        } else {
+            this.inFile1 = t1;
+            this.inFile2 = t2;
+        }
         // 计算bucket数量:
         bucketNum = getBucketNum(param.splitSize);
+        logger.info("bucket_num: %d", bucketNum);
         bucketMask = bucketNum - 1;
         init_dirs(); // TODO 打开
     }
@@ -122,12 +134,22 @@ public class ShuffleWorker implements IWorker {
 
     }
 
+    private final int guessLineNum() {
+        return (int) (inFile1.toFile().length()
+                / 214 / bucketNum);
+    }
+
+
     private void mergeAndOut() {
         logger.info("begin merge:");
         for (int i = 0; i < bucketNum; i++) {
-            logger.info("begin merge tmp_%d:", i);
+            logger.debug("begin merge tmp_%d:", i);
             // 1. open tmp1-i build bloom+hashMap by tmp1
             // final StringBloomFilter blf = new StringBloomFilter();
+            final BloomFilter<String> blf = BloomFilter.create(
+                    Funnels.stringFunnel(StandardCharsets.UTF_8)
+                    , guessLineNum());
+            logger.debug("guessLineNum(): %d", guessLineNum());
             final Map<String, List<Long>> map = new HashMap<>();
             // final Map<String, List<Long>> map = new OpenHashMap<>();
             Path tmpPath;
@@ -139,6 +161,7 @@ public class ShuffleWorker implements IWorker {
                 lines.forEach(lineWithIndex -> {
                     String[] words = StringUtils.split(lineWithIndex, '\001');
                     List<Long> old = map.get(words[0]);
+                    blf.put(words[0]);// TODO remove
                     if (old == null) {
                         map.put(words[0], Arrays.asList(Long.valueOf(words[1])));
                     } else {
@@ -151,8 +174,8 @@ public class ShuffleWorker implements IWorker {
             }
             // 2. delete tmp1
             tmpPath.toFile().delete();
-            logger.info("build tmp1-%d info ok", i);
-            logger.info("tmp1-%d hashmap size: %d", i, map.size());
+            logger.debug("build tmp1-%d info ok", i);
+            logger.debug("tmp1-%d hashmap size: %d", i, map.size());
             // 3. open tmp2-i, write out-i
             tmpPath = Paths.get(tmpPath2.toString()
                     , String.valueOf(i) + tmpPostFix);
@@ -165,14 +188,15 @@ public class ShuffleWorker implements IWorker {
             ) {
                 lines.forEach(lineWithIndex -> {
                     String[] words = StringUtils.split(lineWithIndex, '\001');
-                    // if (blf.contains(words[0])) {
-                    List<Long> old = map.getOrDefault(words[0], null);
-                    if (old != null) {
-                        for (Long index : old) {
-                            out.write(words[0] + "\001" + index + "\001" + words[1] + '\n');
+                    if (blf.mightContain(words[0])) {// todo remove
+                        // if (blf.contains(words[0])) {// todo remove
+                        List<Long> old = map.get(words[0]);
+                        if (old != null) {
+                            for (Long index : old) {
+                                out.write(words[0] + "\001" + index + "\001" + words[1] + '\n');
+                            }
                         }
                     }
-                    // }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
@@ -181,18 +205,18 @@ public class ShuffleWorker implements IWorker {
                 tmpPath.toFile().delete();
             }
             // 4. close file
-            logger.info("finish merge tmp_%d.", i);
+            logger.debug("finish merge tmp_%d.", i);
         }
         // 5. merge out:
-        logger.info("begin merge res:");
-        try (FileWriter fw = new FileWriter(Paths.get(outPath.toString()
+        // logger.info("begin merge res:");
+        /*try (FileWriter fw = new FileWriter(Paths.get(outPath.toString()
                 , resFileName).toFile(), true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
             // mergeFiles(out);
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     private void mergeFiles(PrintWriter out) {

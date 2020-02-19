@@ -14,7 +14,13 @@ public class Logger {
 
     public void info(String line, Object... args) {
         String dateTime = LocalDateTime.now(ZoneOffset.of("+8")).format(formatter);
-        System.out.println(dateTime+" "+String.format(line, args));
+        System.out.println(dateTime + " " + String.format(line, args));
+    }
+
+    public void debug(String line, Object... args) {
+        // do nothing
+        /*String dateTime = LocalDateTime.now(ZoneOffset.of("+8")).format(formatter);
+        System.out.println(dateTime + " " + String.format(line, args));*/
     }
 
     public static void main(String[] args) {
