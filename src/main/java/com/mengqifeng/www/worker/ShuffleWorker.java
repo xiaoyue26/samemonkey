@@ -131,6 +131,7 @@ public class ShuffleWorker implements IWorker {
             final Map<String, List<Long>> map = new HashMap<>();
             // final Map<String, List<Long>> map = new OpenHashMap<>();
             Path tmpPath;
+            // TODO 选择较小的来build map
             tmpPath = Paths.get(tmpPath1.toString()
                     , String.valueOf(i) + tmpPostFix);
             try (Stream<String> lines = Files.lines(tmpPath)) {
