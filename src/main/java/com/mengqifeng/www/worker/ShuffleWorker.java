@@ -2,6 +2,7 @@ package com.mengqifeng.www.worker;
 
 // import com.google.common.hash.BloomFilter;
 //import com.google.common.hash.Funnels;
+
 import com.mengqifeng.www.logic.ConsoleParam;
 import com.mengqifeng.www.utils.*;
 
@@ -9,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,7 +40,10 @@ public class ShuffleWorker implements IWorker {
     private final String tmpPostFix = ".txt";
     private final String resFileName = "res.txt";
     private final Logger logger = LogFactory.getLogger(this.getClass());
-
+    private final Charset CS = StandardCharsets.UTF_8;
+    private final char SEP = '\001';
+    private final String SEP_STR = "\001";
+    private final String NL = "\n";
 
     public ShuffleWorker(ConsoleParam param) {
         epoch = String.valueOf(System.currentTimeMillis());
@@ -60,7 +65,7 @@ public class ShuffleWorker implements IWorker {
         bucketNum = getBucketNum(param.splitSize);
         logger.info("bucket_num: %d", bucketNum);
         bucketMask = bucketNum - 1;
-        init_dirs(); // TODO 打开
+        init_dirs();
     }
 
     private int getBucketNum(int splitSize) {
@@ -89,11 +94,11 @@ public class ShuffleWorker implements IWorker {
     public void run() throws IOException {
         logger.info("shuffling first file:");
         // 1. 读取第1个文件=>写到tmp/{epoch}/1/n个文件;
-        shuffle(0); // todo 打开
+        shuffle(0);
         logger.info("finish shuffle first file.");
         // 2. 读取第2个文件=>写到tmp/{epoch}/2/n个文件;
         logger.info("shuffling second file:");
-        shuffle(1); // todo 打开
+        shuffle(1);
         logger.info("finish shuffle second file.");
         // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
         mergeAndOut();
@@ -113,14 +118,14 @@ public class ShuffleWorker implements IWorker {
             PrintWriter out = new PrintWriter(bw);
             printerList.add(out);
         }
-        try (Stream<String> lines = Files.lines(inFile)) {
+        try (Stream<String> lines = Files.lines(inFile, CS)) {
             Iterator<String> iterator = lines.iterator();
             long rowIndex = 0;
             while (iterator.hasNext()) {
                 String line = iterator.next();
                 int bucketId = Math.abs(line.hashCode()) & bucketMask;
                 PrintWriter out = printerList.get(bucketId);
-                out.write(line + "\001" + rowIndex + "\n");
+                out.write(line + SEP_STR + rowIndex + NL);
                 rowIndex++;
             }
         } catch (IOException e) {
@@ -153,13 +158,13 @@ public class ShuffleWorker implements IWorker {
             final Map<String, List<Long>> map = new HashMap<>();
             // final Map<String, List<Long>> map = new OpenHashMap<>();
             Path tmpPath;
-            // TODO 选择较小的来build map
+            // 选择较小的来build map:
             tmpPath = Paths.get(tmpPath1.toString()
                     , String.valueOf(i) + tmpPostFix);
-            try (Stream<String> lines = Files.lines(tmpPath)) {
+            try (Stream<String> lines = Files.lines(tmpPath, CS)) {
 
                 lines.forEach(lineWithIndex -> {
-                    String[] words = StringUtils.split(lineWithIndex, '\001');
+                    String[] words = StringUtils.split(lineWithIndex, SEP);
                     List<Long> old = map.get(words[0]);
                     // blf.put(words[0]);// TODO remove
                     if (old == null) {
@@ -179,7 +184,7 @@ public class ShuffleWorker implements IWorker {
             // 3. open tmp2-i, write out-i
             tmpPath = Paths.get(tmpPath2.toString()
                     , String.valueOf(i) + tmpPostFix);
-            try (Stream<String> lines = Files.lines(tmpPath);
+            try (Stream<String> lines = Files.lines(tmpPath, CS);
                  FileWriter fw = new FileWriter(Paths.get(outPath.toString()
                          , String.valueOf(i) + tmpPostFix).toFile()
                          , true);
@@ -187,15 +192,15 @@ public class ShuffleWorker implements IWorker {
                  PrintWriter out = new PrintWriter(bw)
             ) {
                 lines.forEach(lineWithIndex -> {
-                    String[] words = StringUtils.split(lineWithIndex, '\001');
+                    String[] words = StringUtils.split(lineWithIndex, SEP);
                     // if (blf.mightContain(words[0])) {// todo remove
-                        // if (blf.contains(words[0])) {// todo remove
-                        List<Long> old = map.get(words[0]);
-                        if (old != null) {
-                            for (Long index : old) {
-                                out.write(words[0] + "\001" + index + "\001" + words[1] + '\n');
-                            }
+                    // if (blf.contains(words[0])) {// todo remove
+                    List<Long> old = map.get(words[0]);
+                    if (old != null) {
+                        for (Long index : old) {
+                            out.write(words[0] + SEP_STR + index + SEP_STR + words[1] + '\n');
                         }
+                    }
                     // }
                 });
             } catch (IOException e) {
@@ -223,7 +228,7 @@ public class ShuffleWorker implements IWorker {
         for (int i = 0; i < bucketNum; i++) {
             Path tmpPath = Paths.get(outPath.toString()
                     , String.valueOf(i) + tmpPostFix);
-            try (Stream<String> lines = Files.lines(tmpPath)) {
+            try (Stream<String> lines = Files.lines(tmpPath, CS)) {
                 lines.forEach(
                         line -> {
                             out.write(line + '\n');
@@ -238,7 +243,7 @@ public class ShuffleWorker implements IWorker {
     private void clear() {
         // todo delete tmp files
 
-        // todo delete out1 files
+        // todo delete out files
     }
 
 

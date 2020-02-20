@@ -12,7 +12,7 @@ public class Main {
     private static final Logger logger = LogFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException {
-        FileUtils.deleteDirectory(new File("D:/work/out"));
+        // FileUtils.deleteDirectory(new File("D:/work/out"));
         long start = System.nanoTime();
         // 1. 获得环境参数:
         // 2. 读取输入的文件路径配置、参数:
@@ -25,8 +25,6 @@ public class Main {
         // 6. clear资源:
         long end = System.nanoTime();
         logger.info("运行时间: %fs", (double) (end - start) / 1000000000);
-        // 运行时间: 2769.734857601s hashmap+bloom+全重复
-        // 运行时间: 2483.774556s hashmap+全重复
 
     }
 }

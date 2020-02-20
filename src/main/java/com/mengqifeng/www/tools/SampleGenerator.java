@@ -84,11 +84,7 @@ public class SampleGenerator {
 
     public static void main(String[] args) {
         SampleGenerator sgen = new SampleGenerator();
-        // 随机中文 20020000 line => 4.2G 249s
-        // 随机中文 50000000 line => 10.3G 770s
-        // 纯数字: 614090872 line => 6.6G 2000s
-        // 同频中文 50000000 line => 10.3G 696s
-        // 同频中文 20000000 line =>  4.2G
+
         final int maxLineLen = 101;
         /*sgen.genSample(Paths.get("D:/work/old/sample1.txt")
                 , maxLines, maxLineLen);
