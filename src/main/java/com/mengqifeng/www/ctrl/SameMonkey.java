@@ -20,7 +20,7 @@ public class SameMonkey {
         // 3. 采样文件n个块,生成采样结果:
         // 4. 根据上述结果,选择执行计划:
         // 5. 执行选择的方法:
-        IWorker worker = WorkerFactory.createShuffleWorker(param);
+        IWorker worker = WorkerFactory.createWorker(param);
         worker.run();
         // 6. clear资源:
         long end = System.nanoTime();

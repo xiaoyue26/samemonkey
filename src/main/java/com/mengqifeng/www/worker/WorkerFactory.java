@@ -4,7 +4,7 @@ import com.mengqifeng.www.logic.ConsoleParam;
 
 public class WorkerFactory {
 
-    public static IWorker createShuffleWorker(ConsoleParam param){
-        return new ShuffleWorker(param);
+    public static IWorker createWorker(ConsoleParam param){
+        return new HashMergeWork(param);
     }
 }
