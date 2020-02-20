@@ -1,5 +1,7 @@
-package com.mengqifeng.www.tools;
+package com.mengqifeng.www.ctrl;
 
+import com.mengqifeng.www.tools.Generators;
+import com.mengqifeng.www.tools.ICharGenerator;
 import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
 

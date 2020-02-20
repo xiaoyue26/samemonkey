@@ -1,6 +1,5 @@
 package com.mengqifeng.www.tools;
 
-import java.util.Random;
 
 public interface ICharGenerator {
     char getRandomChar() ;

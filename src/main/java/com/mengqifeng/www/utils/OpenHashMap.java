@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * 存储结构不够紧凑，用位图应该会更快
  * Created by MatveyI on 22.02.2015.
  * <p>
  * Linear probing hash map implementation
