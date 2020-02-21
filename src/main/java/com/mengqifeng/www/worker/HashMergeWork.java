@@ -38,7 +38,8 @@ public class HashMergeWork implements IWorker {
             inFile2 = t2;
         }
         // 计算bucket数量:
-        int bucketNum = getBucketNum(param.splitSize);
+        int bucketNum = getBucketNum(param.splitSize,
+                t1.toFile().length() + t2.toFile().length());
         logger.info("bucket_num: %d", bucketNum);
         int bucketMask = bucketNum - 1;
         context = new ApplicationContext(tmpPath1, tmpPath2
@@ -47,9 +48,7 @@ public class HashMergeWork implements IWorker {
         init_dirs();
     }
 
-    private int getBucketNum(int splitSize) {
-        long sumSize = context.inFile1.toFile().length()
-                + context.inFile2.toFile().length();
+    private int getBucketNum(int splitSize, long sumSize) {
         return SizeUtils.tableSizeFor((int) (sumSize / splitSize));
     }
 

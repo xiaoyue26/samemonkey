@@ -50,7 +50,7 @@ public class MergeStage implements IStage {
             try (Stream<String> lines = Files.lines(tmpPath, context.CS)) {
 
                 lines.forEach(lineWithIndex -> {
-                    String[] words = StringUtils.split(lineWithIndex, context.SEP);
+                    String[] words = StringUtils.rightSplit2(lineWithIndex, context.SEP);
                     List<Long> old = map.get(words[0]);
                     // blf.put(words[0]);// TODO remove
                     if (old == null) {
@@ -78,7 +78,7 @@ public class MergeStage implements IStage {
                  PrintWriter out = new PrintWriter(bw)
             ) {
                 lines.forEach(lineWithIndex -> {
-                    String[] words = StringUtils.split(lineWithIndex, context.SEP);
+                    String[] words = StringUtils.rightSplit2(lineWithIndex, context.SEP);
                     // if (blf.mightContain(words[0])) {// todo remove
                     // if (blf.contains(words[0])) {// todo remove
                     List<Long> old = map.get(words[0]);

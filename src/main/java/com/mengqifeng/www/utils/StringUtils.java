@@ -21,16 +21,26 @@ public class StringUtils {
         return result;
     }
 
+    public static String[] rightSplit2(String data, char sep) {
+        int l = data.lastIndexOf(sep);
+        if (l >= 0) {
+            String[] result = new String[2];
+            result[0] = data.substring(0, l);
+            result[1] = data.substring(l + 1);
+            return result;
+        } else {
+            return new String[]{data};
+        }
+    }
+
     public static void main(String[] args) {
-        String data = "a\00126";
-        String[] words = StringUtils.split(data, '\001');
+        String data = "a";
+        String[] words = StringUtils.rightSplit2(data, '\001');
         for (String word : words) {
             System.out.println(word);
         }
         for (String word : args) {
             System.out.println(word);
         }
-        Map<Integer,Integer> map=new HashMap<>();
-        System.out.println(map.get(1));
     }
 }
