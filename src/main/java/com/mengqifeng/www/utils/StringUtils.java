@@ -34,7 +34,7 @@ public class StringUtils {
     }
 
     public static void main(String[] args) {
-        String data = "a";
+        String data = "a\001b\001c";
         String[] words = StringUtils.rightSplit2(data, '\001');
         for (String word : words) {
             System.out.println(word);

@@ -70,20 +70,28 @@ public class HashMergeWork implements IWorker {
     }
 
     public void run() throws IOException {
-        IStage shuffleStage = new ShuffleStage(context);
-        shuffleStage.run();
-        // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
-        IStage mergeStage = new MergeStage(context);
-        mergeStage.run();
-        // 4. clear资源
-        clear();
+        try {
+            IStage shuffleStage = new ShuffleStage(context);
+            shuffleStage.run();
+            // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
+            IStage mergeStage = new MergeStage(context);
+            mergeStage.run();
+        } catch (Throwable e) {
+            throw e;// 接着往外抛
+        } finally {
+            // 4. clear资源
+            clear();
+        }
     }
 
 
     private void clear() {
-        // todo delete tmp files
-
-        // todo delete out files
+        // tmp和out目录一定有拼上epoch字段,因此不会误删根目录:
+        // clear tmp path:
+        FileUtils.deleteDirectory(context.tmpPath1.toFile());
+        FileUtils.deleteDirectory(context.tmpPath2.toFile());
+        // delete out path:
+        FileUtils.deleteDirectory(context.outPath.toFile());
     }
 
 
