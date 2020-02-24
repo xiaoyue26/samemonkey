@@ -11,10 +11,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class MergeStage implements IStage {
@@ -24,13 +21,16 @@ public class MergeStage implements IStage {
     public MergeStage(ApplicationContext context) {
         this.context = context;
     }
-    public void run(){
+
+    public void run() {
         mergeAndOut();
     }
+
     private final int guessLineNum() {
         return (int) (context.inFile1.toFile().length()
                 / 214 / context.bucketNum);
     }
+
     private void mergeAndOut() {
         logger.info("begin merge:");
         for (int i = 0; i < context.bucketNum; i++) {
@@ -54,7 +54,9 @@ public class MergeStage implements IStage {
                     List<Long> old = map.get(words[0]);
                     // blf.put(words[0]);// TODO remove
                     if (old == null) {
-                        map.put(words[0], Arrays.asList(Long.valueOf(words[1])));
+                        old = new ArrayList<>();
+                        old.add(Long.valueOf(words[1]));
+                        map.put(words[0], old);
                     } else {
                         old.add(Long.valueOf(words[1]));
                     }
@@ -125,9 +127,6 @@ public class MergeStage implements IStage {
             }
         }
     }
-
-
-
 
 
 }

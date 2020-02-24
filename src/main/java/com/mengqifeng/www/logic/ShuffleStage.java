@@ -3,10 +3,7 @@ package com.mengqifeng.www.logic;
 import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ShuffleStage implements IStage{
+public class ShuffleStage implements IStage {
     private final ApplicationContext context;
     private final Logger logger = LogFactory.getLogger(this.getClass());
 
@@ -23,6 +20,7 @@ public class ShuffleStage implements IStage{
         this.context = context;
     }
 
+    @SuppressWarnings("Duplicates")
     public void run() throws IOException {
         logger.info("shuffling first file:");
         // 1. 读取第1个文件=>写到tmp/{epoch}/1/n个文件;
@@ -35,6 +33,9 @@ public class ShuffleStage implements IStage{
 
     }
 
+    private final int writeBuffSize = 512 * 1024;
+    private final int readBuffSize = 512 * 1024;
+
     private void shuffle(int i) throws IOException {
         Path inFile = i == 0 ? context.inFile1 : context.inFile2;
         final Path workPath = i == 0 ? context.tmpPath1 : context.tmpPath2;
@@ -42,11 +43,18 @@ public class ShuffleStage implements IStage{
         for (int j = 0; j < context.bucketNum; j++) {
             FileWriter fw = new FileWriter(Paths.get(workPath.toString()
                     , j + context.tmpPostFix).toFile(), true);
-            BufferedWriter bw = new BufferedWriter(fw);
+            BufferedWriter bw = new BufferedWriter(fw, writeBuffSize);
             PrintWriter out = new PrintWriter(bw);
             printerList.add(out);
         }
-        try (Stream<String> lines = Files.lines(inFile, context.CS)) {
+
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                        new FileInputStream(inFile.toFile())
+                        , context.CS)
+                , readBuffSize);
+             Stream<String> lines = br.lines()
+        ) {
             Iterator<String> iterator = lines.iterator();
             long rowIndex = 0;
             while (iterator.hasNext()) {

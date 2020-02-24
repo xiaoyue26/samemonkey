@@ -37,7 +37,7 @@ public class SampleGenerator {
             try (Stream<String> lines = Files.lines(dictPath)) {
                 lines.forEach(line -> {
                     for (char c : line.toCharArray()) {
-                        if (c != '\n' && c != '\001') {
+                        if (c != '\n') {
                             dict.add(c);
                         }
                     }

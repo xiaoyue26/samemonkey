@@ -23,8 +23,8 @@ public class ApplicationContext {
     // public final String resFileName = "res.txt";
 
     public final Charset CS = StandardCharsets.UTF_8;
-    public final char SEP = '\001';
-    public final String SEP_STR = "\001";
+    public final char SEP = '#';
+    public final String SEP_STR = "#";
     public final String NL = "\n";
 
 

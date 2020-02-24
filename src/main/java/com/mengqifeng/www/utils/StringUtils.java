@@ -1,6 +1,8 @@
 package com.mengqifeng.www.utils;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class StringUtils {
@@ -42,5 +44,9 @@ public class StringUtils {
         for (String word : args) {
             System.out.println(word);
         }
+        char ss = '着';
+        byte b = (byte) ss;
+        System.out.println(b);
+        System.out.println((int)ss);
     }
 }

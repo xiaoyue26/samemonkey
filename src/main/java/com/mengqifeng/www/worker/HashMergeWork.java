@@ -71,16 +71,18 @@ public class HashMergeWork implements IWorker {
 
     public void run() throws IOException {
         try {
-            IStage shuffleStage = new ShuffleStage(context);
+            IStage shuffleStage =
+                    // new ShuffleStage(context);
+                    new ByteShuffleStage(context);
             shuffleStage.run();
             // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
-            IStage mergeStage = new MergeStage(context);
+            IStage mergeStage = new ByteMergeStage(context);
             mergeStage.run();
         } catch (Throwable e) {
             throw e;// 接着往外抛
         } finally {
             // 4. clear资源
-            clear();
+            // clear();
         }
     }
 
