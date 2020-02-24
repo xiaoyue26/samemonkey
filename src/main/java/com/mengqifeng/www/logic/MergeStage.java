@@ -86,7 +86,16 @@ public class MergeStage implements IStage {
                     List<Long> old = map.get(words[0]);
                     if (old != null) {
                         for (Long index : old) {
-                            out.write(words[0] + context.SEP_STR + index + context.SEP_STR + words[1] + '\n');
+                            if (context.reverseFlag) {
+                                out.write(words[0]
+                                        + context.SEP_STR + words[1]
+                                        + context.SEP_STR + index + '\n');
+                            } else {
+                                out.write(words[0]
+                                        + context.SEP_STR + index
+                                        + context.SEP_STR + words[1] + '\n');
+                            }
+
                         }
                     }
                     // }

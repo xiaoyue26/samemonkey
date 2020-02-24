@@ -30,10 +30,12 @@ public class HashMergeWork implements IWorker {
         Path t1 = Paths.get(param.inFile1);
         Path t2 = Paths.get(param.inFile2);
         Path inFile1, inFile2;
+        boolean reverseFlag = false;
         if (t1.toFile().length()
                 > t2.toFile().length()) { // 确保小的文件在前面:
             inFile1 = t2;
             inFile2 = t1;
+            reverseFlag = true;
         } else {
             inFile1 = t1;
             inFile2 = t2;
@@ -45,7 +47,7 @@ public class HashMergeWork implements IWorker {
         int bucketMask = bucketNum - 1;
         context = new ApplicationContext(tmpPath1, tmpPath2
                 , outPath, inFile1, inFile2
-                , epoch, bucketNum, bucketMask);
+                , epoch, bucketNum, bucketMask,reverseFlag);
         init_dirs();
         algoType = param.algoType;
     }

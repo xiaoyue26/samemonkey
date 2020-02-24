@@ -24,7 +24,6 @@ public class ConsoleParam {
     }
 
     public static ConsoleParam parseArgs(String[] args) {
-        System.out.println(args);
         if (args.length < 5) {
             throw new IllegalArgumentException("输入参数不足");
         }

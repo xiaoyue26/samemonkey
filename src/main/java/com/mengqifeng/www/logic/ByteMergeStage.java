@@ -147,10 +147,17 @@ public class ByteMergeStage implements IStage {
             Long rowIndex = Long.valueOf(new String(buf
                     , i + 1, right - i, context.CS));
             for (Long index : old) {
-                out.write(buf, left, right - left + 1);
-                out.write((context.SEP_STR + String.valueOf(index)
-                        + context.SEP_STR + String.valueOf(rowIndex)
-                        + context.NL).getBytes(context.CS));
+                out.write(line.data);// write line
+                if (context.reverseFlag) {// 文件1更大,先写rowIndex
+                    out.write((context.SEP_STR + String.valueOf(rowIndex)
+                            + context.SEP_STR + String.valueOf(index)
+                            + context.NL).getBytes(context.CS));
+                } else {// 文件1更小,先写map里的
+                    out.write((context.SEP_STR + String.valueOf(index)
+                            + context.SEP_STR + String.valueOf(rowIndex)
+                            + context.NL).getBytes(context.CS));
+                }
+
             }
         }
     }
@@ -168,8 +175,6 @@ public class ByteMergeStage implements IStage {
         Node line;
         try {
             line = new Node(buf, left, i - 1);
-
-
             List<Long> old = map.get(line);
             Long rowIndex = Long.valueOf(new String(buf
                     , i + 1, right - i, context.CS));

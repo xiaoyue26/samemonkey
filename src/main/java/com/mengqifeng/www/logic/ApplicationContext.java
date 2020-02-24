@@ -26,6 +26,7 @@ public class ApplicationContext {
     public final char SEP = '#';
     public final String SEP_STR = "#";
     public final String NL = "\n";
+    public final boolean reverseFlag;
 
 
     public ApplicationContext(Path tmpPath1
@@ -33,7 +34,8 @@ public class ApplicationContext {
             , Path outPath
             , Path inFile1
             , Path inFile2
-            , String epoch, int bucketNum, int bucketMask) {
+            , String epoch, int bucketNum, int bucketMask
+            , boolean reverseFlag) {
         this.tmpPath1 = tmpPath1;
         this.tmpPath2 = tmpPath2;
         this.outPath = outPath;
@@ -42,5 +44,6 @@ public class ApplicationContext {
         this.epoch = epoch;
         this.bucketNum = bucketNum;
         this.bucketMask = bucketMask;
+        this.reverseFlag = reverseFlag;
     }
 }
