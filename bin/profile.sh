@@ -1,1 +1,1 @@
-./profiler.sh -d 300 -f profile.svg 27731
+./profiler.sh -d 30 -f profile.svg 27731

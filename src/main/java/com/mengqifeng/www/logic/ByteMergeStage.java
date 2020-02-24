@@ -144,7 +144,8 @@ public class ByteMergeStage implements IStage {
         Node line = new Node(buf, left, i - 1);
         List<Long> old = map.get(line);
         if (old != null) {
-            Long rowIndex = Long.valueOf(new String(buf, i + 1, right, context.CS));
+            Long rowIndex = Long.valueOf(new String(buf
+                    , i + 1, right - i, context.CS));
             for (Long index : old) {
                 out.write(buf, left, right - left + 1);
                 out.write((context.SEP_STR + String.valueOf(index)
