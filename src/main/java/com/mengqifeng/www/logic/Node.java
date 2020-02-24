@@ -1,6 +1,7 @@
 package com.mengqifeng.www.logic;
 
-import com.mengqifeng.www.utils.HashUtils;
+
+import java.util.Arrays;
 
 public class Node {
 
@@ -14,7 +15,8 @@ public class Node {
 
     @Override
     public int hashCode() {
-        return HashUtils.hashCode(data, 0, data.length - 1);
+        return Arrays.hashCode(data);
+        // return HashUtils.hashCode(data, 0, data.length - 1);
     }
 
     @Override

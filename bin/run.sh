@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -ex
+
 nohup java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
 Main /data/mengqifeng/bench/tmp \
 /data/mengqifeng/bench/out \

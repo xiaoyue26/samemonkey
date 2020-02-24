@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -ex
+
 nohup java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
 com.mengqifeng.www.ctrl.SampleGenerator \
 /data/mengqifeng/input/sample3.txt \
