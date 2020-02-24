@@ -93,7 +93,7 @@ public class HashMergeWork implements IWorker {
             throw e;// 接着往外抛
         } finally {
             // 4. clear资源
-            // clear();
+            clear();
         }
     }
 
@@ -104,7 +104,7 @@ public class HashMergeWork implements IWorker {
         FileUtils.deleteDirectory(context.tmpPath1.toFile());
         FileUtils.deleteDirectory(context.tmpPath2.toFile());
         // delete out path:
-        FileUtils.deleteDirectory(context.outPath.toFile());
+        // FileUtils.deleteDirectory(context.outPath.toFile());
     }
 
 
