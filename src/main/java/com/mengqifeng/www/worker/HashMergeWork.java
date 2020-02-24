@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 public class HashMergeWork implements IWorker {
     private final ApplicationContext context;
     private final Logger logger = LogFactory.getLogger(this.getClass());
+    private final int algoType;
 
     public HashMergeWork(ConsoleParam param) {
         String epoch = String.valueOf(System.currentTimeMillis());
@@ -46,6 +47,7 @@ public class HashMergeWork implements IWorker {
                 , outPath, inFile1, inFile2
                 , epoch, bucketNum, bucketMask);
         init_dirs();
+        algoType = param.algoType;
     }
 
     private int getBucketNum(int splitSize, long sumSize) {
@@ -71,13 +73,22 @@ public class HashMergeWork implements IWorker {
 
     public void run() throws IOException {
         try {
-            IStage shuffleStage =
-                    // new ShuffleStage(context);
-                    new ByteShuffleStage(context);
-            shuffleStage.run();
-            // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
-            IStage mergeStage = new ByteMergeStage(context);
-            mergeStage.run();
+            if (algoType == 0) {
+                logger.info("using simple shuffle");
+                IStage shuffleStage = new ShuffleStage(context);
+                shuffleStage.run();
+                // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
+                IStage mergeStage = new MergeStage(context);
+                mergeStage.run();
+            } else {
+                logger.info("using byte shuffle");
+                IStage shuffleStage = new ByteShuffleStage(context);
+                shuffleStage.run();
+                // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
+                IStage mergeStage = new ByteMergeStage(context);
+                mergeStage.run();
+            }
+
         } catch (Throwable e) {
             throw e;// 接着往外抛
         } finally {
