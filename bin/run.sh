@@ -70,11 +70,12 @@ ${TMP_PATH}/${timestamp}_sort1.txt \
 ${TMP_PATH}/${timestamp}_sort1.txt \
 ${BUF_SIZE} 2
 
-
 if [ $? -eq 0 ] ;then
     echo `date`
     echo 'job success'
-    exit
 else
     echo 'sort shuffle failed! give up...'
 fi
+
+rm ${TMP_PATH}/${timestamp}_sort1.txt # limit rm
+rm ${TMP_PATH}/${timestamp}_sort2.txt # limit rm
