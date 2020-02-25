@@ -18,13 +18,15 @@ import java.util.stream.Stream;
 public class MergeCompare implements IStage {
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final ApplicationContext context;
+    private long workingProgress = 0;
+    private final long logInternal = 10000 * 100;
 
     public MergeCompare(ApplicationContext context) {
         this.context = context;
     }
 
     private LineAndNum getNextValid(Iterator<String> list) {
-        if(!list.hasNext()){
+        if (!list.hasNext()) {
             return null;
         }
         String[] word = StringUtils.leftSplit2(list.next(), context.SEP);
@@ -51,7 +53,6 @@ public class MergeCompare implements IStage {
         }
     }
 
-    private long workingProgress = 0;
 
     @Override
     public void run() throws IOException {
@@ -99,7 +100,7 @@ public class MergeCompare implements IStage {
                         }
                     }
                 }
-                if (workingProgress % 10000 == 0) {
+                if (workingProgress % logInternal == 0) {
                     logger.info("has scan %d lines", workingProgress);
                 }
             }
