@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ShuffleStage implements IStage {
+public class ShuffleStage implements IShuffleStage {
     private final ApplicationContext context;
     private final Logger logger = LogFactory.getLogger(this.getClass());
 
@@ -19,23 +19,11 @@ public class ShuffleStage implements IStage {
         this.context = context;
     }
 
-    @SuppressWarnings("Duplicates")
-    public void run() throws IOException {
-        logger.info("shuffling first file:");
-        // 1. 读取第1个文件=>写到tmp/{epoch}/1/n个文件;
-        shuffle(0);
-        logger.info("finish shuffle first file.");
-        // 2. 读取第2个文件=>写到tmp/{epoch}/2/n个文件;
-        logger.info("shuffling second file:");
-        shuffle(1);
-        logger.info("finish shuffle second file.");
-
-    }
-
     private final int writeBuffSize = 512 * 1024;
     private final int readBuffSize = 512 * 1024;
 
-    private void shuffle(int i) throws IOException {
+    public void shuffle(int i) throws IOException {
+        logger.info("shuffling %d file:", i);
         Path inFile = i == 0 ? context.inFile1 : context.inFile2;
         final Path workPath = i == 0 ? context.tmpPath1 : context.tmpPath2;
         final List<PrintWriter> printerList = new ArrayList<>(context.bucketNum);

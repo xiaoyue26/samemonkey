@@ -4,24 +4,26 @@ import com.mengqifeng.www.utils.HashUtils;
 import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ByteShuffleStage implements IShuffleStage {
+public class MmapShuffleStage implements IShuffleStage {
     private final ApplicationContext context;
     private final Logger logger = LogFactory.getLogger(this.getClass());
 
-    public ByteShuffleStage(ApplicationContext context) {
+    public MmapShuffleStage(ApplicationContext context) {
         this.context = context;
     }
 
     private final int writeBuffSize = 512 * 1024;
     private final int readBuffSize = 512 * 1024;
-
 
     private void writeLineWithIndex(
             List<BufferedOutputStream> printerList
@@ -45,7 +47,7 @@ public class ByteShuffleStage implements IShuffleStage {
     }
 
     public void shuffle(int i) throws IOException {
-        logger.info("shuffling %d file:", i);
+        logger.info("shuffling %d file.", i);
         Path inFile = i == 0 ? context.inFile1 : context.inFile2;
         final Path workPath = i == 0 ? context.tmpPath1 : context.tmpPath2;
         final List<BufferedOutputStream> printerList = new ArrayList<>(context.bucketNum);

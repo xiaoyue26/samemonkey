@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class MergeStage implements IStage {
+public class MergeStage implements IMergeStage {
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final ApplicationContext context;
 
@@ -22,16 +22,13 @@ public class MergeStage implements IStage {
         this.context = context;
     }
 
-    public void run() {
-        mergeAndOut();
-    }
 
     private final int guessLineNum() {
         return (int) (context.inFile1.toFile().length()
                 / 214 / context.bucketNum);
     }
 
-    private void mergeAndOut() {
+    public void mergeAndOut() {
         logger.info("begin merge:");
         for (int i = 0; i < context.bucketNum; i++) {
             logger.debug("begin merge tmp_%d:", i);

@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MergeCompare implements IStage {
+public class MergeCompare implements IMergeStage {
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final ApplicationContext context;
     private long workingProgress = 0;
@@ -53,9 +53,8 @@ public class MergeCompare implements IStage {
         }
     }
 
-
     @Override
-    public void run() throws IOException {
+    public void mergeAndOut() throws IOException {
         try (Stream<String> stream1 = Files.lines(context.inFile1);
              Stream<String> stream2 = Files.lines(context.inFile2);
              FileWriter fw = new FileWriter(Paths.get(context.outPath.toString()
@@ -110,7 +109,7 @@ public class MergeCompare implements IStage {
         } catch (IOException e) {
             throw e;
         }
-
-
     }
+
+
 }

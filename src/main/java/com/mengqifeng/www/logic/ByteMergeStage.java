@@ -2,27 +2,24 @@ package com.mengqifeng.www.logic;
 
 import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
-import com.mengqifeng.www.utils.StringUtils;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
-public class ByteMergeStage implements IStage {
+public class ByteMergeStage implements IMergeStage {
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final ApplicationContext context;
     private final int writeBuffSize = 512 * 1024;
     private final int readBuffSize = 512 * 1024;
 
+    private int workingRow = 0;
+
+
     public ByteMergeStage(ApplicationContext context) {
         this.context = context;
-    }
-
-    public void run() {
-        mergeAndOut();
     }
 
     private final int guessLineNum() {
@@ -30,8 +27,7 @@ public class ByteMergeStage implements IStage {
                 / 214 / context.bucketNum);
     }
 
-    @SuppressWarnings("Duplicates")
-    private void mergeAndOut() {
+    public void mergeAndOut() {
         logger.info("begin merge:");
         for (int i = 0; i < context.bucketNum; i++) {
             logger.debug("begin merge tmp_%d:", i);
@@ -162,8 +158,6 @@ public class ByteMergeStage implements IStage {
         }
     }
 
-    private int workingRow = 0;
-
     private void recordLineWithIndex(Map<Node, List<Long>> map, byte[] buf, int left, int right) {
         int i = right;
         byte sep = (byte) context.SEP;
@@ -197,9 +191,6 @@ public class ByteMergeStage implements IStage {
     }
 
 
-    public static void main(String[] args) {
-
-    }
 }
 
 

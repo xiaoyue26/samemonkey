@@ -77,23 +77,27 @@ public class HashMergeWork implements IWorker {
         try {
             if (algoType == 0) {
                 logger.info("using simple shuffle");
-                IStage shuffleStage = new ShuffleStage(context);
+                IShuffleStage shuffleStage = new ShuffleStage(context);
                 shuffleStage.run();
-                // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
-                IStage mergeStage = new MergeStage(context);
+                IMergeStage mergeStage = new MergeStage(context);
                 mergeStage.run();
             } else if (algoType == 1) {
                 logger.info("using byte shuffle");
-                IStage shuffleStage = new ByteShuffleStage(context);
+                IShuffleStage shuffleStage = new ByteShuffleStage(context);
                 shuffleStage.run();
-                // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
-                IStage mergeStage = new ByteMergeStage(context);
+                IMergeStage mergeStage = new ByteMergeStage(context);
                 mergeStage.run();
-            } else { // merge sorted:
+            } else if (algoType == 2) { // merge sorted:
                 // merge two files:
                 logger.info("merge two files");
-                IStage mergeStage = new MergeCompare(context);
+                IMergeStage mergeStage = new MergeCompare(context);
                 mergeStage.run();
+            }else if (algoType == 3) {
+                logger.info("using mmap shuffle");
+                IShuffleStage shuffleStage = new MmapShuffleStage(context);
+                shuffleStage.run();
+                // IMergeStage mergeStage = new ByteMergeStage(context);
+                // mergeStage.run();
             }
 
         } catch (Throwable e) {
