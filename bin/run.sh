@@ -42,33 +42,58 @@ timestamp=`date +%Y%m%d_%H%M%S`
 
 echo `date`
 awk '$0=NR"#"$0' ${IN_PATH1} > ${TMP_PATH}/${timestamp}_1.txt
-echo `date`
+if [ $? -eq 0 ] ;then
+    echo `date`
+else
+    echo 'sort shuffle failed! give up...'
+    rm ${TMP_PATH}/${timestamp}_1.txt
+    exit
+fi
+
 
 LC_ALL=C \
 sort -t '#' -k 2 --parallel=4 -S 2g -T ${TMP_PATH} \
 ${TMP_PATH}/${timestamp}_1.txt -o ${TMP_PATH}/${timestamp}_sort1.txt
-echo `date`
-
-rm ${TMP_PATH}/${timestamp}_1.txt # limit rm
+if [ $? -eq 0 ] ;then
+    echo `date`
+    rm ${TMP_PATH}/${timestamp}_1.txt # limit rm
+else
+    echo 'sort shuffle failed! give up...'
+    rm ${TMP_PATH}/${timestamp}_1.txt
+    rm ${TMP_PATH}/${timestamp}_sort1.txt
+    exit
+fi
 
 
 echo `date`
 awk '$0=NR"#"$0' ${IN_PATH2} > ${TMP_PATH}/${timestamp}_2.txt
-echo `date`
+if [ $? -eq 0 ] ;then
+    echo `date`
+else
+    echo 'sort shuffle failed! give up...'
+    rm ${TMP_PATH}/${timestamp}_2.txt
+    exit
+fi
 
 LC_ALL=C \
 sort -t '#' -k 2 --parallel=4 -S 2g -T ${TMP_PATH} \
 ${TMP_PATH}/${timestamp}_2.txt -o ${TMP_PATH}/${timestamp}_sort2.txt
-echo `date`
-
-rm ${TMP_PATH}/${timestamp}_2.txt # limit rm
+if [ $? -eq 0 ] ;then
+    echo `date`
+    rm ${TMP_PATH}/${timestamp}_2.txt # limit rm
+else
+    echo 'sort shuffle failed! give up...'
+    rm ${TMP_PATH}/${timestamp}_2.txt
+    rm ${TMP_PATH}/${timestamp}_sort2.txt
+    exit
+fi
 
 
 java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
 Main ${TMP_PATH} ${OUT_PATH} \
 ${TMP_PATH}/${timestamp}_sort1.txt \
-${TMP_PATH}/${timestamp}_sort1.txt \
-${BUF_SIZE} 2
+${TMP_PATH}/${timestamp}_sort2.txt \
+${BUF_SIZE} 2 # merge two files
 
 if [ $? -eq 0 ] ;then
     echo `date`
