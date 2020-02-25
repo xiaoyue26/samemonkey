@@ -24,9 +24,14 @@ public class MergeCompare implements IStage {
     }
 
     private LineAndNum getNextValid(Iterator<String> list) {
+        if(!list.hasNext()){
+            return null;
+        }
         String[] word = StringUtils.leftSplit2(list.next(), context.SEP);
+        workingProgress++;
         while (word.length != 2 && list.hasNext()) {
             word = StringUtils.leftSplit2(list.next(), context.SEP);
+            workingProgress++;
         }
         if (word.length == 2) {
             return new LineAndNum(word[1], Long.valueOf(word[0]));
@@ -46,6 +51,8 @@ public class MergeCompare implements IStage {
         }
     }
 
+    private long workingProgress = 0;
+
     @Override
     public void run() throws IOException {
         try (Stream<String> stream1 = Files.lines(context.inFile1);
@@ -60,6 +67,7 @@ public class MergeCompare implements IStage {
             Iterator<String> list2 = stream2.iterator();
             LineAndNum head1 = getNextValid(list1);
             LineAndNum head2 = getNextValid(list2);
+
             while (head1 != null && head2 != null) {
                 if (head1.line.compareTo(head2.line) < 0) {
                     head1 = getNextValid(list1);
@@ -91,7 +99,9 @@ public class MergeCompare implements IStage {
                         }
                     }
                 }
-
+                if (workingProgress % 10000 == 0) {
+                    logger.info("has scan %d lines", workingProgress);
+                }
             }
             // skip remain, do nothing
 

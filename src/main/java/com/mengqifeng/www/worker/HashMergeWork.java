@@ -91,6 +91,7 @@ public class HashMergeWork implements IWorker {
                 mergeStage.run();
             } else { // merge sorted:
                 // merge two files:
+                logger.info("merge two files");
                 IStage mergeStage = new MergeCompare(context);
                 mergeStage.run();
             }
