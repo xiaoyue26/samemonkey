@@ -14,7 +14,7 @@ else
 fi
 
 if [ $# -lt 5 ] ; then
-    BUF_SIZE = 128000000
+    BUF_SIZE=128000000
 else
     BUF_SIZE=$5
 fi
@@ -22,7 +22,7 @@ fi
 java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
 Main ${TMP_PATH} ${OUT_PATH} \
 ${IN_PATH1} ${IN_PATH2} \
-${BUF_SIZE} 1 > out.log
+${BUF_SIZE} 1
 
 if [ $? -eq 0 ] ;then
     echo `date`
@@ -32,10 +32,7 @@ else
     echo 'hash shuffle failed! try sort merge:'
 fi
 
-# Define a timestamp function
-timestamp() {
-  date +%Y%m%d_%H%M%S
-}
+timestamp=`date +%Y%m%d_%H%M%S`
 
 echo `date`
 awk '$0=NR"#"$0' ${IN_PATH1} > ${TMP_PATH}/${timestamp}_1.txt
@@ -65,7 +62,7 @@ java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
 Main ${TMP_PATH} ${OUT_PATH} \
 ${TMP_PATH}/${timestamp}_sort1.txt \
 ${TMP_PATH}/${timestamp}_sort1.txt \
-${BUF_SIZE} 2 >> out.log
+${BUF_SIZE} 2
 
 
 if [ $? -eq 0 ] ;then
