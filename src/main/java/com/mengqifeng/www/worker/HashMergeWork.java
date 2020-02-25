@@ -83,20 +83,20 @@ public class HashMergeWork implements IWorker {
                 mergeStage.run();
             } else if (algoType == 1) {
                 logger.info("using byte shuffle");
-                IShuffleStage shuffleStage = new ByteShuffleStage(context);
+                IShuffleStage shuffleStage = new ByteShuffleStage(context, false);
                 shuffleStage.run();
-                IMergeStage mergeStage = new ByteMergeStage(context);
+                IMergeStage mergeStage = new ByteMergeStage(context, false);
                 mergeStage.run();
             } else if (algoType == 2) { // merge sorted:
                 // merge two files:
                 logger.info("merge two files");
                 IMergeStage mergeStage = new MergeCompare(context);
                 mergeStage.run();
-            }else if (algoType == 3) {
+            } else if (algoType == 3) {
                 logger.info("using mmap shuffle");
-                IShuffleStage shuffleStage = new MmapShuffleStage(context);
+                IShuffleStage shuffleStage = new ByteShuffleStage(context, true);
                 shuffleStage.run();
-                IMergeStage mergeStage = new ByteMergeStage(context);
+                IMergeStage mergeStage = new ByteMergeStage(context, true);
                 mergeStage.run();
             }
 

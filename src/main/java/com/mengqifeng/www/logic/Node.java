@@ -6,6 +6,7 @@ import java.util.Arrays;
 public class Node {
 
     public final byte[] data;
+    // TODO 使用left,right将小片内存申请转化成大片内存申请
 
     public Node(byte[] buf, int left, int right) {
         data = new byte[right - left + 1];

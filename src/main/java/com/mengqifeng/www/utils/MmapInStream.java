@@ -2,20 +2,19 @@ package com.mengqifeng.www.utils;
 
 import sun.misc.Cleaner;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-public class MmapInStream implements Closeable {
+public class MmapInStream extends InputStream{
     private final MappedByteBuffer[] mappedBuffer;
     private final FileInputStream fileIn;
     private final int splitNum;
+    private final Logger logger = LogFactory.getLogger(this.getClass());
+    private byte[] b1 = null;
 
     private int curSplitIndex = 0;
     private final int maxSplitSize = 128 * 1024 * 1024;// 128MB
@@ -25,7 +24,7 @@ public class MmapInStream implements Closeable {
         FileChannel fileChannel = fileIn.getChannel();
         final long fileSize = fileChannel.size();
         splitNum = (int) Math.ceil((double) fileSize / maxSplitSize);
-        System.out.println("splitNum:" + splitNum);
+        logger.info("splitNum: %d", splitNum);
         mappedBuffer = new MappedByteBuffer[splitNum];// splitNum个分片
         buildMmap(fileChannel, fileSize, splitNum, mappedBuffer);
     }
@@ -47,6 +46,11 @@ public class MmapInStream implements Closeable {
                     , splitSize);
             offset += splitSize;
         }
+    }
+
+    @Override
+    public int read() throws IOException {
+        throw new UnsupportedOperationException("not implement");
     }
 
     public int read(byte[] fillBuf, int offset, int length) {

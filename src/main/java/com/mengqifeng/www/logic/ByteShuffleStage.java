@@ -5,7 +5,6 @@ import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,9 +13,11 @@ import java.util.List;
 public class ByteShuffleStage implements IShuffleStage {
     private final ApplicationContext context;
     private final Logger logger = LogFactory.getLogger(this.getClass());
+    private final boolean useMmap;
 
-    public ByteShuffleStage(ApplicationContext context) {
+    public ByteShuffleStage(ApplicationContext context, boolean useMmap) {
         this.context = context;
+        this.useMmap = useMmap;
     }
 
     private final int writeBuffSize = 512 * 1024;
@@ -59,8 +60,8 @@ public class ByteShuffleStage implements IShuffleStage {
         final byte[] buf = new byte[readBuffSize];
         final byte NL = (byte) '\n';
         int remainLen = 0;
-        int left = 0, right = -1;
-        try (InputStream is = Files.newInputStream(inFile)) {
+        int left, right;
+        try (InputStream is = InputStreams.newInStream(inFile, useMmap)) {
             long rowIndex = 0;
             int len = is.read(buf, remainLen
                     , buf.length - remainLen);
@@ -71,9 +72,6 @@ public class ByteShuffleStage implements IShuffleStage {
                 // split buf with '\n'
                 for (int j = remainLen; j < remainLen + len; j++) {
                     if (buf[j] == NL) {
-                        if (rowIndex >= 717682) {
-                            // System.out.println("debug");
-                        }
                         if (left > right) {
                             System.out.println("error");
                         }

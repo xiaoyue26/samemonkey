@@ -4,7 +4,6 @@ import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -16,10 +15,11 @@ public class ByteMergeStage implements IMergeStage {
     private final int readBuffSize = 512 * 1024;
 
     private int workingRow = 0;
+    private final boolean useMmap;
 
-
-    public ByteMergeStage(ApplicationContext context) {
+    public ByteMergeStage(ApplicationContext context, boolean useMmap) {
         this.context = context;
+        this.useMmap = useMmap;
     }
 
     private final int guessLineNum() {
@@ -27,6 +27,7 @@ public class ByteMergeStage implements IMergeStage {
                 / 214 / context.bucketNum);
     }
 
+    @SuppressWarnings("Duplicates")
     public void mergeAndOut() {
         logger.info("begin merge:");
         for (int i = 0; i < context.bucketNum; i++) {
@@ -42,7 +43,7 @@ public class ByteMergeStage implements IMergeStage {
             final byte NL = (byte) '\n';
             int remainLen = 0;
             int left = 0, right = -1;
-            try (InputStream is = Files.newInputStream(tmpPath)) {
+            try (InputStream is = InputStreams.newInStream(tmpPath, useMmap)) {
                 int len = is.read(buf, remainLen, buf.length - remainLen);
                 for (; len >= 0; len = is.read(buf, remainLen, buf.length - remainLen)) {
                     left = 0;
@@ -83,7 +84,7 @@ public class ByteMergeStage implements IMergeStage {
             remainLen = 0;
             left = 0;
             right = -1;
-            try (InputStream is = Files.newInputStream(tmpPath);
+            try (InputStream is = InputStreams.newInStream(tmpPath,useMmap);
                  BufferedOutputStream out = new BufferedOutputStream(
                          new FileOutputStream(Paths.get(context.outPath.toString()
                                  , String.valueOf(i) + context.tmpPostFix).toFile())
