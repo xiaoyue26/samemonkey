@@ -57,10 +57,10 @@ public class MmapInStream implements Closeable {
         int readSize;
         if (remained > length) {
             readSize = length;
-            mappedBuffer[curSplitIndex].get(fillBuf, offset, length);
+            mappedBuffer[curSplitIndex].get(fillBuf, offset, readSize);
         } else {
             readSize = remained;
-            mappedBuffer[curSplitIndex].get(fillBuf, offset, length);
+            mappedBuffer[curSplitIndex].get(fillBuf, offset, readSize);
             curSplitIndex++;
         }
         return readSize;
