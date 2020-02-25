@@ -47,7 +47,7 @@ public class HashMergeWork implements IWorker {
         int bucketMask = bucketNum - 1;
         context = new ApplicationContext(tmpPath1, tmpPath2
                 , outPath, inFile1, inFile2
-                , epoch, bucketNum, bucketMask,reverseFlag);
+                , epoch, bucketNum, bucketMask, reverseFlag);
         init_dirs();
         algoType = param.algoType;
     }
@@ -82,12 +82,16 @@ public class HashMergeWork implements IWorker {
                 // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
                 IStage mergeStage = new MergeStage(context);
                 mergeStage.run();
-            } else {
+            } else if (algoType == 1) {
                 logger.info("using byte shuffle");
                 IStage shuffleStage = new ByteShuffleStage(context);
                 shuffleStage.run();
                 // 3. 读取tmp1、tmp2目录,依次merge n个文件,输出到out/{epoch}目录;
                 IStage mergeStage = new ByteMergeStage(context);
+                mergeStage.run();
+            } else { // merge sorted:
+                // merge two files:
+                IStage mergeStage = new MergeCompare(context);
                 mergeStage.run();
             }
 

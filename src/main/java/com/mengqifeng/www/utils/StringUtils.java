@@ -35,6 +35,16 @@ public class StringUtils {
         }
     }
 
+    public static String[] leftSplit2(String data, char sep) {
+        int r = data.indexOf(sep);
+        if (r >= 0) {
+            return new String[]{data.substring(0, r)
+                    , data.substring(r + 1)};
+        } else {
+            return new String[]{data};
+        }
+    }
+
     public static void main(String[] args) {
         String data = "a\001b\001c";
         String[] words = StringUtils.rightSplit2(data, '\001');
@@ -47,6 +57,6 @@ public class StringUtils {
         char ss = '着';
         byte b = (byte) ss;
         System.out.println(b);
-        System.out.println((int)ss);
+        System.out.println((int) ss);
     }
 }
