@@ -3,6 +3,7 @@ package com.mengqifeng.www.logic;
 import com.mengqifeng.www.utils.HashUtils;
 import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
+import com.mengqifeng.www.utils.MmapInStream;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -61,8 +62,8 @@ public class MmapShuffleStage implements IShuffleStage {
         final byte[] buf = new byte[readBuffSize];
         final byte NL = (byte) '\n';
         int remainLen = 0;
-        int left = 0, right = -1;
-        try (InputStream is = Files.newInputStream(inFile)) {
+        int left, right;
+        try (MmapInStream is = new MmapInStream(inFile.toFile())) {
             long rowIndex = 0;
             int len = is.read(buf, remainLen
                     , buf.length - remainLen);
@@ -73,9 +74,6 @@ public class MmapShuffleStage implements IShuffleStage {
                 // split buf with '\n'
                 for (int j = remainLen; j < remainLen + len; j++) {
                     if (buf[j] == NL) {
-                        if (rowIndex >= 717682) {
-                            // System.out.println("debug");
-                        }
                         if (left > right) {
                             System.out.println("error");
                         }

@@ -96,8 +96,8 @@ public class HashMergeWork implements IWorker {
                 logger.info("using mmap shuffle");
                 IShuffleStage shuffleStage = new MmapShuffleStage(context);
                 shuffleStage.run();
-                // IMergeStage mergeStage = new ByteMergeStage(context);
-                // mergeStage.run();
+                IMergeStage mergeStage = new ByteMergeStage(context);
+                mergeStage.run();
             }
 
         } catch (Throwable e) {
