@@ -96,7 +96,8 @@ public class MergeCompare implements IStage {
                         for (Long n2 : numList2) {
                             out.write(line
                                     + context.SEP_STR + n1
-                                    + context.SEP_STR + n2);
+                                    + context.SEP_STR + n2
+                                    + context.NL);
                         }
                     }
                 }
