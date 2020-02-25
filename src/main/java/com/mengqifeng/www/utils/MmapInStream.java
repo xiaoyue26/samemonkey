@@ -24,7 +24,7 @@ public class MmapInStream extends InputStream{
         FileChannel fileChannel = fileIn.getChannel();
         final long fileSize = fileChannel.size();
         splitNum = (int) Math.ceil((double) fileSize / maxSplitSize);
-        logger.info("splitNum: %d", splitNum);
+        logger.debug("splitNum: %d", splitNum);
         mappedBuffer = new MappedByteBuffer[splitNum];// splitNum个分片
         buildMmap(fileChannel, fileSize, splitNum, mappedBuffer);
     }

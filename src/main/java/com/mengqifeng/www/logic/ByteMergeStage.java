@@ -27,7 +27,6 @@ public class ByteMergeStage implements IMergeStage {
                 / 214 / context.bucketNum);
     }
 
-    @SuppressWarnings("Duplicates")
     public void mergeAndOut() {
         logger.info("begin merge:");
         for (int i = 0; i < context.bucketNum; i++) {

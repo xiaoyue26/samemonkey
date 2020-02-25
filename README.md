@@ -11,8 +11,7 @@ mvn package
 
 # 运行
 ```bash
-java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
-Main /data/mengqifeng/bench/tmp \
+sh run.sh /data/mengqifeng/bench/tmp \
 /data/mengqifeng/bench/out \
 /data/mengqifeng/bench/input/10g.txt \
 /data/mengqifeng/bench/input/10g2.txt \
@@ -23,4 +22,4 @@ Main /data/mengqifeng/bench/tmp \
 结果目录;
 进行比较的第1个文件;
 进行比较的第2个文件;
-分片大小;
+缓冲区大小;
