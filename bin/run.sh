@@ -4,7 +4,7 @@ echo `date`
 echo $#
 if [ $# -lt 4 ] ; then
     # usage
-    echo 'usage: sh run.sh <tmp_path> <out_path> <in_path1> <in_path2> [bufSize]'
+    echo 'usage: sh run.sh <tmp_path> <out_path> <in_path1> <in_path2> [bufSize] [ALGO_TYPE]'
     exit
 else
     TMP_PATH=$1
@@ -19,10 +19,16 @@ else
     BUF_SIZE=$5
 fi
 
+if [ $# -lt 6 ] ; then
+    ALGO_TYPE=1
+else
+    ALGO_TYPE=$6
+fi
+
 java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
 Main ${TMP_PATH} ${OUT_PATH} \
 ${IN_PATH1} ${IN_PATH2} \
-${BUF_SIZE} 1
+${BUF_SIZE} ${ALGO_TYPE}
 
 if [ $? -eq 0 ] ;then
     echo `date`

@@ -147,7 +147,6 @@ public class ByteMergeStage implements IMergeStage {
             e.printStackTrace();
             return e;
         }
-
     }
 
     public void mergeAndOut() throws IOException {

@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 public class FutureUtils {
 
     public static void submitAndCheck(int start, int endEx
-            , final Function<Integer, Exception> fun) throws IOException {
+            , final Function<Integer, Exception> fun)
+            throws IOException {
         List<Future<Exception>> futures = submitRange(start, endEx, fun);
         checkSuccess(futures);
     }
@@ -34,6 +35,7 @@ public class FutureUtils {
                 }
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
+                throw new RuntimeException("concurrent failed");
             }
         }
     }
