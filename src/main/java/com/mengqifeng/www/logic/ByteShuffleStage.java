@@ -1,5 +1,6 @@
 package com.mengqifeng.www.logic;
 
+import com.mengqifeng.www.utils.FutureUtils;
 import com.mengqifeng.www.utils.HashUtils;
 import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
@@ -8,21 +9,54 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class ByteShuffleStage implements IShuffleStage {
     private final ApplicationContext context;
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final boolean useMmap;
+    private final boolean useParallel;
+    private final int writeBuffSize = 512 * 1024;
+    private final int readBuffSize = 512 * 1024;
 
     public ByteShuffleStage(ApplicationContext context, boolean useMmap) {
         this.context = context;
         this.useMmap = useMmap;
+        useParallel = false;
     }
 
-    private final int writeBuffSize = 512 * 1024;
-    private final int readBuffSize = 512 * 1024;
+    public ByteShuffleStage(ApplicationContext context
+            , boolean useMmap
+            , boolean useParallel) {
+        this.context = context;
+        this.useMmap = useMmap;
+        this.useParallel = useParallel;
+    }
 
+    private Exception tryShuffle(int i) {
+        try {
+            shuffle(i);
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e;
+        }
+    }
+
+    public void run() throws IOException {
+        if (useParallel) {
+            FutureUtils.submitAndCheck(0, 2,
+                    this::tryShuffle);
+        } else {
+            shuffle(0);
+            shuffle(1);
+        }
+    }
 
     private void writeLineWithIndex(
             List<BufferedOutputStream> printerList

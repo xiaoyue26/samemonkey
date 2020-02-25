@@ -1,5 +1,6 @@
 package com.mengqifeng.www.logic;
 
+import com.mengqifeng.www.utils.FutureUtils;
 import com.mengqifeng.www.utils.LogFactory;
 import com.mengqifeng.www.utils.Logger;
 
@@ -7,19 +8,32 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.stream.IntStream;
 
 public class ByteMergeStage implements IMergeStage {
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final ApplicationContext context;
     private final int writeBuffSize = 512 * 1024;
     private final int readBuffSize = 512 * 1024;
+    private final boolean useParallel;
+    private final boolean useMmap;
 
     private int workingRow = 0;
-    private final boolean useMmap;
+
 
     public ByteMergeStage(ApplicationContext context, boolean useMmap) {
         this.context = context;
         this.useMmap = useMmap;
+        useParallel = false;
+    }
+
+    public ByteMergeStage(ApplicationContext context, boolean useMmap
+            , boolean useParallel) {
+        this.context = context;
+        this.useMmap = useMmap;
+        this.useParallel = useParallel;
     }
 
     private final int guessLineNum() {
@@ -27,105 +41,126 @@ public class ByteMergeStage implements IMergeStage {
                 / 214 / context.bucketNum);
     }
 
-    public void mergeAndOut() {
-        logger.info("begin merge:");
-        for (int i = 0; i < context.bucketNum; i++) {
-            logger.debug("begin merge tmp_%d:", i);
-            // 1. open tmp1-i build bloom+hashMap by tmp1
-            logger.debug("guessLineNum(): %d", guessLineNum());
-            final Map<Node, List<Long>> map = new HashMap<>();
-            Path tmpPath;
-            // 选择较小的来build map:
-            tmpPath = Paths.get(context.tmpPath1.toString()
-                    , String.valueOf(i) + context.tmpPostFix);
-            final byte[] buf = new byte[readBuffSize];
-            final byte NL = (byte) '\n';
-            int remainLen = 0;
-            int left = 0, right = -1;
-            try (InputStream is = InputStreams.newInStream(tmpPath, useMmap)) {
-                int len = is.read(buf, remainLen, buf.length - remainLen);
-                for (; len >= 0; len = is.read(buf, remainLen, buf.length - remainLen)) {
-                    left = 0;
-                    right = remainLen - 1;
-                    // split buf with '\n'
-                    for (int j = remainLen; j < remainLen + len; j++) {
-                        if (buf[j] == NL) {
-                            recordLineWithIndex(map, buf, left, right);
-                            left = j + 1;
-                            right = j;
-                            workingRow++;
-                        } else {
-                            right++;
-                        }
-                    }
-                    if (left <= right) { // deal remaining bytes:
-                        remainLen = right - left + 1;
-                        // src,srcPos,dest,destPos,length:
-                        System.arraycopy(buf, left, buf, 0, remainLen);
+    private void mergeIFile(int i) {
+        logger.debug("begin merge tmp_%d:", i);
+        // 1. open tmp1-i build bloom+hashMap by tmp1
+        logger.debug("guessLineNum(): %d", guessLineNum());
+        final Map<Node, List<Long>> map = new HashMap<>();
+        Path tmpPath;
+        // 选择较小的来build map:
+        tmpPath = Paths.get(context.tmpPath1.toString()
+                , String.valueOf(i) + context.tmpPostFix);
+        final byte[] buf = new byte[readBuffSize];
+        final byte NL = (byte) '\n';
+        int remainLen = 0;
+        int left = 0, right = -1;
+        try (InputStream is = InputStreams.newInStream(tmpPath, useMmap)) {
+            int len = is.read(buf, remainLen, buf.length - remainLen);
+            for (; len >= 0; len = is.read(buf, remainLen, buf.length - remainLen)) {
+                left = 0;
+                right = remainLen - 1;
+                // split buf with '\n'
+                for (int j = remainLen; j < remainLen + len; j++) {
+                    if (buf[j] == NL) {
+                        recordLineWithIndex(map, buf, left, right);
+                        left = j + 1;
+                        right = j;
+                        workingRow++;
                     } else {
-                        remainLen = 0;
+                        right++;
                     }
                 }
-                if (remainLen > 0) {// deal last line
-                    recordLineWithIndex(map, buf, 0, remainLen - 1);
+                if (left <= right) { // deal remaining bytes:
+                    remainLen = right - left + 1;
+                    // src,srcPos,dest,destPos,length:
+                    System.arraycopy(buf, left, buf, 0, remainLen);
+                } else {
+                    remainLen = 0;
                 }
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            // 2. delete tmp1
-            tmpPath.toFile().delete();
-            logger.debug("build tmp1-%d info ok", i);
-            logger.debug("tmp1-%d hashmap size: %d", i, map.size());
-            // 3. open tmp2-i, write out-i
-            tmpPath = Paths.get(context.tmpPath2.toString()
-                    , String.valueOf(i) + context.tmpPostFix);
-            remainLen = 0;
-            left = 0;
-            right = -1;
-            try (InputStream is = InputStreams.newInStream(tmpPath,useMmap);
-                 BufferedOutputStream out = new BufferedOutputStream(
-                         new FileOutputStream(Paths.get(context.outPath.toString()
-                                 , String.valueOf(i) + context.tmpPostFix).toFile())
-                         , writeBuffSize)
-            ) {
-                int len = is.read(buf, remainLen, buf.length - remainLen);
-                for (; len >= 0; len = is.read(buf, remainLen, buf.length - remainLen)) {
-                    left = 0;
-                    right = remainLen - 1;
-                    // split buf with '\n'
-                    for (int j = remainLen; j < remainLen + len; j++) {
-                        if (buf[j] == NL) {
-                            writeLineWithIndex(out, map
-                                    , buf, left, right);
-                            left = j + 1;
-                            right = j;
-                        } else {
-                            right++;
-                        }
-                    }
-                    if (left <= right) {
-                        // deal remaining bytes:
-                        remainLen = right - left + 1;
-                        // src,srcPos,dest,destPos,length:
-                        System.arraycopy(buf, left, buf, 0, remainLen);
-                    } else {
-                        remainLen = 0;
-                    }
-
-                }
-                if (remainLen > 0) {// deal last line
-                    writeLineWithIndex(out, map
-                            , buf, 0, remainLen - 1);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                tmpPath.toFile().delete();
+            if (remainLen > 0) {// deal last line
+                recordLineWithIndex(map, buf, 0, remainLen - 1);
             }
-            // 4. close file
-            logger.debug("finish merge tmp_%d.", i);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        // 2. delete tmp1
+        tmpPath.toFile().delete();
+        logger.debug("build tmp1-%d info ok", i);
+        logger.debug("tmp1-%d hashmap size: %d", i, map.size());
+        // 3. open tmp2-i, write out-i
+        tmpPath = Paths.get(context.tmpPath2.toString()
+                , String.valueOf(i) + context.tmpPostFix);
+        remainLen = 0;
+        left = 0;
+        right = -1;
+        try (InputStream is = InputStreams.newInStream(tmpPath, useMmap);
+             BufferedOutputStream out = new BufferedOutputStream(
+                     new FileOutputStream(Paths.get(context.outPath.toString()
+                             , String.valueOf(i) + context.tmpPostFix).toFile())
+                     , writeBuffSize)
+        ) {
+            int len = is.read(buf, remainLen, buf.length - remainLen);
+            for (; len >= 0; len = is.read(buf, remainLen, buf.length - remainLen)) {
+                left = 0;
+                right = remainLen - 1;
+                // split buf with '\n'
+                for (int j = remainLen; j < remainLen + len; j++) {
+                    if (buf[j] == NL) {
+                        writeLineWithIndex(out, map
+                                , buf, left, right);
+                        left = j + 1;
+                        right = j;
+                    } else {
+                        right++;
+                    }
+                }
+                if (left <= right) {
+                    // deal remaining bytes:
+                    remainLen = right - left + 1;
+                    // src,srcPos,dest,destPos,length:
+                    System.arraycopy(buf, left, buf, 0, remainLen);
+                } else {
+                    remainLen = 0;
+                }
+
+            }
+            if (remainLen > 0) {// deal last line
+                writeLineWithIndex(out, map
+                        , buf, 0, remainLen - 1);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            tmpPath.toFile().delete();
+        }
+        // 4. close file
+        logger.debug("finish merge tmp_%d.", i);
+    }
+
+    private Exception tryMergeIFile(int i) {
+        try {
+            mergeIFile(i);
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e;
+        }
+
+    }
+
+    public void mergeAndOut() throws IOException {
+        logger.info("begin merge:");
+        if (useParallel) {
+            FutureUtils.submitAndCheck(0, context.bucketNum,
+                    this::tryMergeIFile);
+        } else {
+            for (int i = 0; i < context.bucketNum; i++) {
+                mergeIFile(i);
+            }
+        }
+
 
     }
 

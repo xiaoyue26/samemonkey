@@ -98,6 +98,14 @@ public class HashMergeWork implements IWorker {
                 shuffleStage.run();
                 IMergeStage mergeStage = new ByteMergeStage(context, true);
                 mergeStage.run();
+            } else if (algoType == 4) {
+                logger.info("using byte Parallel shuffle");
+                IShuffleStage shuffleStage = new ByteShuffleStage(
+                        context, false, true);
+                shuffleStage.run();
+                IMergeStage mergeStage = new ByteMergeStage(
+                        context, false, true);
+                mergeStage.run();
             }
 
         } catch (Throwable e) {
