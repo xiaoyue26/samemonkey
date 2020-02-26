@@ -16,10 +16,12 @@ import java.nio.file.Paths;
  * 2. 读取第2个文件=>写到tmp/{epoch}/2/n个文件;
  * 3. 读取上述目录,依次merge n个文件,输出到out/{epoch}目录;
  */
-public class HashMergeWork implements IWorker {
+public abstract class HashMergeWork implements IWorker {
     private final ApplicationContext context;
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final int algoType;
+    private IShuffleStage shuffleStage;
+    private IMergeStage mergeStage;
 
     public HashMergeWork(ConsoleParam param) {
         String epoch = String.valueOf(System.currentTimeMillis());
@@ -77,46 +79,36 @@ public class HashMergeWork implements IWorker {
         try {
             if (algoType == 0) {
                 logger.info("using simple shuffle");
-                IShuffleStage shuffleStage = new ShuffleStage(context);
-                shuffleStage.run();
-                IMergeStage mergeStage = new MergeStage(context);
-                mergeStage.run();
+                shuffleStage = new ShuffleStage(context);
+                mergeStage = new MergeStage(context);
             } else if (algoType == 1) {
                 logger.info("using byte shuffle");
-                IShuffleStage shuffleStage = new ByteShuffleStage(context, false);
-                shuffleStage.run();
-                IMergeStage mergeStage = new ByteMergeStage(context, false);
-                mergeStage.run();
+                shuffleStage = new ByteShuffleStage(context, false);
+                mergeStage = new ByteMergeStage(context, false);
             } else if (algoType == 2) { // merge sorted:
                 // merge two files:
                 logger.info("merge two files");
-                IMergeStage mergeStage = new MergeCompare(context);
-                mergeStage.run();
+                shuffleStage = new SortSuffleStage();
+                mergeStage = new SortMergeStage(context);
             } else if (algoType == 3) {
                 logger.info("using mmap shuffle");
-                IShuffleStage shuffleStage = new ByteShuffleStage(context, true);
-                shuffleStage.run();
-                IMergeStage mergeStage = new ByteMergeStage(context, true);
-                mergeStage.run();
+                shuffleStage = new ByteShuffleStage(context, true);
+                mergeStage = new ByteMergeStage(context, true);
             } else if (algoType == 4) {
                 logger.info("using byte Parallel shuffle");
-                IShuffleStage shuffleStage = new ByteShuffleStage(
+                shuffleStage = new ByteShuffleStage(
                         context, false, true);
-                shuffleStage.run();
-                IMergeStage mergeStage = new ByteMergeStage(
+                mergeStage = new ByteMergeStage(
                         context, false, true);
-                mergeStage.run();
-            }
-            else if (algoType == 6) {
+            } else if (algoType == 5) {
                 logger.info("using byte Parallel merge");
-                IShuffleStage shuffleStage = new ByteShuffleStage(
+                shuffleStage = new ByteShuffleStage(
                         context, false, false);
-                shuffleStage.run();
-                IMergeStage mergeStage = new ByteMergeStage(
+                mergeStage = new ByteMergeStage(
                         context, false, true);
-                mergeStage.run();
             }
-
+            shuffleStage.run();
+            mergeStage.run();
         } catch (Throwable e) {
             throw e;// 接着往外抛
         } finally {

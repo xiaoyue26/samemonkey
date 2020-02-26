@@ -15,13 +15,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MergeCompare implements IMergeStage {
+public class SortMergeStage implements IMergeStage {
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final ApplicationContext context;
     private long workingProgress = 0;
     private final long logInternal = 10000 * 100;
 
-    public MergeCompare(ApplicationContext context) {
+    public SortMergeStage(ApplicationContext context) {
         this.context = context;
     }
 

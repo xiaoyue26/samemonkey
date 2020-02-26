@@ -24,9 +24,7 @@ public class ByteMergeStage implements IMergeStage {
 
 
     public ByteMergeStage(ApplicationContext context, boolean useMmap) {
-        this.context = context;
-        this.useMmap = useMmap;
-        useParallel = false;
+        this(context,useMmap,false);
     }
 
     public ByteMergeStage(ApplicationContext context, boolean useMmap

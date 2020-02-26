@@ -25,9 +25,7 @@ public class ByteShuffleStage implements IShuffleStage {
     private final int readBuffSize = 512 * 1024;
 
     public ByteShuffleStage(ApplicationContext context, boolean useMmap) {
-        this.context = context;
-        this.useMmap = useMmap;
-        useParallel = false;
+        this(context,useMmap,false);
     }
 
     public ByteShuffleStage(ApplicationContext context
