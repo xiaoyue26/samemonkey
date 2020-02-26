@@ -28,27 +28,21 @@ public class SampleGenerator {
         genSample(targetPath, maxLines, maxLineLen, gener);
     }
 
-    @SuppressWarnings("Duplicates")
+    public void genSampleSameRowDict(Path targetPath
+            , long maxLines, final int maxLineLen
+            , Path... dictPaths) {
+        ICharGenerator gener = Generators.createSameRowGen(dictPaths);
+        genSample(targetPath, maxLines, maxLineLen, gener);
+    }
+
     public void genSampleFromDict(Path targetPath
             , long maxLines, final int maxLineLen
             , Path... dictPaths) {
-        final Set<Character> dict = new HashSet<>();
-        for (Path dictPath : dictPaths) {
-            try (Stream<String> lines = Files.lines(dictPath)) {
-                lines.forEach(line -> {
-                    for (char c : line.toCharArray()) {
-                        if (c != '\n') {
-                            dict.add(c);
-                        }
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        logger.info("dict size: %d", dict.size());
-        List<Character> dictList = new ArrayList<>(dict.size());
+        final List<Character> dictList = Generators.getCharList(dictPaths);
+        final Set<Character> dict = new HashSet<>(dictList);
+        dictList.clear();
         dictList.addAll(dict);
+        logger.info("dict size: %d", dictList.size());
         // genSample from dictList:
         ICharGenerator gener = Generators.createDictGen(dictList);
         genSample(targetPath, maxLines, maxLineLen, gener);
@@ -95,7 +89,7 @@ public class SampleGenerator {
         Path target = Paths.get(args[0]); // 结果路径
         long maxLines = Long.valueOf(args[1]);//50 * 1000 * 1000;
         Path dictPath1 = Paths.get(args[2]);// 字典1的路径
-        sgen.genSampleLikeDict(target
+        sgen.genSampleSameRowDict(target
                 , maxLines, maxLineLen
                 , dictPath1);
     }

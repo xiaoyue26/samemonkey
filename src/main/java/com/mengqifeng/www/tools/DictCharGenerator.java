@@ -13,7 +13,7 @@ public class DictCharGenerator implements ICharGenerator {
     }
 
     public final char getRandomChar() {
-        return dictList.get(random.nextInt(dictList.size()));
+        return dictList.get(nextInt(dictList.size()));
     }
 
     @Override
