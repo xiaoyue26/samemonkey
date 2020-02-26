@@ -20,7 +20,7 @@ else
 fi
 
 if [ $# -lt 6 ] ; then
-    ALGO_TYPE=1
+    ALGO_TYPE=4
 else
     ALGO_TYPE=$6
 fi

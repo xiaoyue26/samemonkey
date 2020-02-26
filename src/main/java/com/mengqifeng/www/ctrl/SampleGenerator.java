@@ -89,7 +89,7 @@ public class SampleGenerator {
         Path target = Paths.get(args[0]); // 结果路径
         long maxLines = Long.valueOf(args[1]);//50 * 1000 * 1000;
         Path dictPath1 = Paths.get(args[2]);// 字典1的路径
-        sgen.genSampleSameRowDict(target
+        sgen.genSampleLikeDict(target
                 , maxLines, maxLineLen
                 , dictPath1);
     }
