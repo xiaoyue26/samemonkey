@@ -16,14 +16,14 @@ import java.nio.file.Paths;
  * 2. 读取第2个文件=>写到tmp/{epoch}/2/n个文件;
  * 3. 读取上述目录,依次merge n个文件,输出到out/{epoch}目录;
  */
-public class HashMergeWork implements IWorker {
+public class HashMergeWorker implements IWorker {
     private final ApplicationContext context;
     private final Logger logger = LogFactory.getLogger(this.getClass());
     private final int algoType;
     private IShuffleStage shuffleStage;
     private IMergeStage mergeStage;
 
-    public HashMergeWork(ConsoleParam param) {
+    public HashMergeWorker(ConsoleParam param) {
         String epoch = String.valueOf(System.currentTimeMillis());
         // epoch = "1581843611465";
         Path tmpPath1 = Paths.get(param.tmpDir, epoch, "1");
