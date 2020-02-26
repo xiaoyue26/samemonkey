@@ -40,6 +40,7 @@ fi
 
 timestamp=`date +%Y%m%d_%H%M%S`
 
+# 1.0 add line number:
 echo `date`
 awk '$0=NR"#"$0' ${IN_PATH1} > ${TMP_PATH}/${timestamp}_1.txt
 if [ $? -eq 0 ] ;then
@@ -50,7 +51,7 @@ else
     exit
 fi
 
-
+# 1.1 sort first file:
 LC_ALL=C \
 sort -t '#' -k 2 --parallel=4 -S 2g -T ${TMP_PATH} \
 ${TMP_PATH}/${timestamp}_1.txt -o ${TMP_PATH}/${timestamp}_sort1.txt
@@ -64,7 +65,7 @@ else
     exit
 fi
 
-
+# 2.0 add line number:
 echo `date`
 awk '$0=NR"#"$0' ${IN_PATH2} > ${TMP_PATH}/${timestamp}_2.txt
 if [ $? -eq 0 ] ;then
@@ -75,6 +76,7 @@ else
     exit
 fi
 
+# 2.1 sort second file:
 LC_ALL=C \
 sort -t '#' -k 2 --parallel=4 -S 2g -T ${TMP_PATH} \
 ${TMP_PATH}/${timestamp}_2.txt -o ${TMP_PATH}/${timestamp}_sort2.txt
@@ -88,7 +90,7 @@ else
     exit
 fi
 
-
+# 3. merge two sorted file:
 java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
 Main ${TMP_PATH} ${OUT_PATH} \
 ${TMP_PATH}/${timestamp}_sort1.txt \
