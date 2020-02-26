@@ -107,6 +107,15 @@ public class HashMergeWork implements IWorker {
                         context, false, true);
                 mergeStage.run();
             }
+            else if (algoType == 6) {
+                logger.info("using byte Parallel merge");
+                IShuffleStage shuffleStage = new ByteShuffleStage(
+                        context, false, false);
+                shuffleStage.run();
+                IMergeStage mergeStage = new ByteMergeStage(
+                        context, false, true);
+                mergeStage.run();
+            }
 
         } catch (Throwable e) {
             throw e;// 接着往外抛
