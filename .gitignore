@@ -11,3 +11,4 @@ gradlew*
 gradle.properties
 hikaricp.properties
 *.txt
+*.jar

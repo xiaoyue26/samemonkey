@@ -2,13 +2,10 @@
 The Same Monkey(TSM) is a tool of finding the same row of two file.
 真假美猴王
 寻找两个文件中相同的行，输出行号
-
 # 编译
 ```bath
 mvn package
 ```
-
-
 # 运行
 ```bash
 sh run.sh /data/mengqifeng/bench/tmp \
