@@ -1,0 +1,1 @@
+java -Xms128m -Xmx128m -classpath samemonkey-1.0-SNAPSHOT.jar Main ./tmp ./out %1 %2 16000000 4
