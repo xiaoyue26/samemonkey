@@ -2,27 +2,41 @@
 set -x
 echo `date`
 echo $#
-if [ $# -lt 4 ] ; then
+JVM_HEAP=1024
+if [ $# -lt 2 ] ; then
     # usage
-    echo 'usage: sh run.sh <tmp_path> <out_path> <in_path1> <in_path2> [bufSize] [ALGO_TYPE]'
+    echo 'usage: sh run.sh <in_path1> <in_path2> [tmp_path] [out_path] [bufSize] [ALGO_TYPE]'
     exit
 else
-    TMP_PATH=$1
-    OUT_PATH=$2
-    IN_PATH1=$3
-    IN_PATH2=$4
+    IN_PATH1=$1
+    IN_PATH2=$2
 fi
+
+if [ $# -lt 3 ] ; then
+    TMP_PATH=./tmp
+else
+    TMP_PATH=$3
+fi
+
+if [ $# -lt 4 ] ; then
+    OUT_PATH=./out
+else
+    OUT_PATH=$4
+fi
+
 if [ $# -lt 5 ] ; then
     BUF_SIZE=128000000
 else
     BUF_SIZE=$5
 fi
+
 if [ $# -lt 6 ] ; then
     ALGO_TYPE=4
 else
     ALGO_TYPE=$6
 fi
-java -Xms1024m -Xmx1024m -classpath samemonkey-1.0-SNAPSHOT.jar \
+
+java -Xms${JVM_HEAP}m -Xmx${JVM_HEAP}m -classpath samemonkey-1.0-SNAPSHOT.jar \
 Main ${TMP_PATH} ${OUT_PATH} \
 ${IN_PATH1} ${IN_PATH2} \
 ${BUF_SIZE} ${ALGO_TYPE}
@@ -81,7 +95,7 @@ else
     exit
 fi
 # 3. merge two sorted file:
-java -Xms2048m -Xmx2048m -classpath samemonkey-1.0-SNAPSHOT.jar \
+java -Xms${JVM_HEAP}m -Xmx${JVM_HEAP}m -classpath samemonkey-1.0-SNAPSHOT.jar \
 Main ${TMP_PATH} ${OUT_PATH} \
 ${TMP_PATH}/${timestamp}_sort1.txt \
 ${TMP_PATH}/${timestamp}_sort2.txt \

@@ -26,7 +26,7 @@ public class ApplicationContext {
     public final char SEP = '#';
     public final String SEP_STR = "#";
     public final String NL = "\n";
-    public final boolean reverseFlag;
+    public final boolean reverseFlag;// 是否交换过两个文件的顺序
 
 
     public ApplicationContext(Path tmpPath1

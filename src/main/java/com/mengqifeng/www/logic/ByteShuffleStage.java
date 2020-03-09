@@ -20,7 +20,7 @@ public class ByteShuffleStage implements IShuffleStage {
     private final int readBuffSize = 512 * 1024;
 
     public ByteShuffleStage(ApplicationContext context, boolean useMmap) {
-        this(context,useMmap,false);
+        this(context, useMmap, false);
     }
 
     public ByteShuffleStage(ApplicationContext context
@@ -40,7 +40,7 @@ public class ByteShuffleStage implements IShuffleStage {
             return e;
         }
     }
-
+    // shuffle输入的文件,进行分区、加上行号,输出到多个分片文件
     public void run() throws IOException {
         if (useParallel) {
             FutureUtils.submitAndCheck(0, 2,
@@ -51,6 +51,14 @@ public class ByteShuffleStage implements IShuffleStage {
         }
     }
 
+    /** 将缓冲区中数据加上行号,写到文件:
+     * @param printerList 带缓冲的输出流
+     * @param buf 缓冲区
+     * @param left 起始下标 include
+     * @param right 结束下标 include
+     * @param rowIndex 行号
+     * @throws IOException
+     */
     private void writeLineWithIndex(
             List<BufferedOutputStream> printerList
             , byte[] buf
@@ -63,9 +71,6 @@ public class ByteShuffleStage implements IShuffleStage {
         BufferedOutputStream out = printerList.get(bucketId);
         if (left <= right) {
             out.write(buf, left, right - left + 1);
-        } else {// 2215987
-            logger.info("error");
-            return;// TODO remove
         }
         out.write((context.SEP_STR
                 + String.valueOf(rowIndex)
@@ -74,6 +79,7 @@ public class ByteShuffleStage implements IShuffleStage {
 
     public void shuffle(int i) throws IOException {
         logger.info("shuffling %d file:", i);
+        // 设置初始状态:
         Path inFile = i == 0 ? context.inFile1 : context.inFile2;
         final Path workPath = i == 0 ? context.tmpPath1 : context.tmpPath2;
         final List<BufferedOutputStream> printerList = new ArrayList<>(context.bucketNum);
@@ -88,6 +94,7 @@ public class ByteShuffleStage implements IShuffleStage {
         final byte NL = (byte) '\n';
         int remainLen = 0;
         int left, right;
+        // 读取输入,根据换行符读取文件,添加行号、输出:
         try (InputStream is = InputStreams.newInStream(inFile, useMmap)) {
             long rowIndex = 0;
             int len = is.read(buf, remainLen
@@ -99,9 +106,6 @@ public class ByteShuffleStage implements IShuffleStage {
                 // split buf with '\n'
                 for (int j = remainLen; j < remainLen + len; j++) {
                     if (buf[j] == NL) {
-                        if (left > right) {
-                            System.out.println("error");
-                        }
                         writeLineWithIndex(printerList, buf, left, right
                                 , rowIndex);
                         left = j + 1;
@@ -129,11 +133,13 @@ public class ByteShuffleStage implements IShuffleStage {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            // 关闭所有输出文件:
             for (int j = 0; j < context.bucketNum; j++) {
                 // PrintWriter out = printerList.get(j);
                 BufferedOutputStream out = printerList.get(j);
                 out.close();
             }
+            // 输入文件由try with resource特性自动关闭
         }
 
     }

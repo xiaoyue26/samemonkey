@@ -109,8 +109,6 @@ public class HashMergeWorker implements IWorker {
             }
             shuffleStage.run();
             mergeStage.run();
-        } catch (Throwable e) {
-            throw e;// 接着往外抛
         } finally {
             // 4. clear资源
             clear();
@@ -124,6 +122,7 @@ public class HashMergeWorker implements IWorker {
         FileUtils.deleteDirectory(context.tmpPath1.toFile());
         FileUtils.deleteDirectory(context.tmpPath2.toFile());
         // delete out path:
+        logger.info("output in:\n%s",context.outPath.getFileName());
         // FileUtils.deleteDirectory(context.outPath.toFile());
     }
 

@@ -12,12 +12,11 @@ public class SameMonkey {
 
     private static final Logger logger = LogFactory.getLogger(SameMonkey.class);
     public static void main(String[] args) throws IOException {
-        // FileUtils.deleteDirectory(new File("D:/work/out"));
         long start = System.nanoTime();
-        // 1. 获得环境参数:
+        // 1. 获得环境参数; TODO
         // 2. 读取输入的文件路径配置、参数:
         ConsoleParam param = ConsoleParam.parseArgs(args);
-        // 3. 采样文件n个块,生成采样结果:
+        // 3. 采样文件n个块,生成采样结果: TODO
         // 4. 根据上述结果,选择执行计划:
         // 5. 执行选择的方法:
         IWorker worker = WorkerFactory.createWorker(param);

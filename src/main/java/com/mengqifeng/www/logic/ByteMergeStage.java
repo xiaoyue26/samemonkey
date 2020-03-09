@@ -17,7 +17,7 @@ public class ByteMergeStage implements IMergeStage {
     private final boolean useParallel;
     private final boolean useMmap;
 
-    private int workingRow = 0;
+    private int workingRow = 0;// 当前处理到第几行(仅用于查看进度)
 
 
     public ByteMergeStage(ApplicationContext context, boolean useMmap) {
@@ -35,8 +35,9 @@ public class ByteMergeStage implements IMergeStage {
         return (int) (context.inFile1.toFile().length()
                 / 214 / context.bucketNum);
     }
-
+    // 合并第i个分片的两个文件:
     private void mergeIFile(int i) {
+        // 初始化状态:
         logger.debug("begin merge tmp_%d:", i);
         // 1. open tmp1-i build bloom+hashMap by tmp1
         logger.debug("guessLineNum(): %d", guessLineNum());
@@ -49,6 +50,7 @@ public class ByteMergeStage implements IMergeStage {
         final byte NL = (byte) '\n';
         int remainLen = 0;
         int left = 0, right = -1;
+        // 读取第一个文件,建立hashmap:
         try (InputStream is = InputStreams.newInStream(tmpPath, useMmap)) {
             int len = is.read(buf, remainLen, buf.length - remainLen);
             for (; len >= 0; len = is.read(buf, remainLen, buf.length - remainLen)) {
@@ -90,6 +92,7 @@ public class ByteMergeStage implements IMergeStage {
         remainLen = 0;
         left = 0;
         right = -1;
+        // 读取第二个文件,比对上一步的hashmap,输出重复的行:
         try (InputStream is = InputStreams.newInStream(tmpPath, useMmap);
              BufferedOutputStream out = new BufferedOutputStream(
                      new FileOutputStream(Paths.get(context.outPath.toString()
@@ -158,6 +161,15 @@ public class ByteMergeStage implements IMergeStage {
 
     }
 
+    /**
+     * 读取缓冲区的数据,检查map输出相同行、在两个文件中的行号
+     * @param out 输出缓冲流
+     * @param map 用第一个文件建立的哈希索引
+     * @param buf 缓冲区
+     * @param left 起始下标 include
+     * @param right 结束下标 include
+     * @throws IOException
+     */
     private void writeLineWithIndex(BufferedOutputStream out, Map<Node, List<Long>> map, byte[] buf, int left, int right) throws IOException {
         int i = right;
         byte sep = (byte) context.SEP;
@@ -187,6 +199,13 @@ public class ByteMergeStage implements IMergeStage {
         }
     }
 
+    /**
+     * 读取缓冲区,更新哈希索引: 记录新行号，或增加新节点
+     * @param map 哈希索引
+     * @param buf 缓冲区
+     * @param left 起始下标 include
+     * @param right 结束下标 include
+     */
     private void recordLineWithIndex(Map<Node, List<Long>> map, byte[] buf, int left, int right) {
         int i = right;
         byte sep = (byte) context.SEP;
