@@ -122,9 +122,10 @@ public class HashMergeWorker implements IWorker {
         FileUtils.deleteDirectory(context.tmpPath1.toFile());
         FileUtils.deleteDirectory(context.tmpPath2.toFile());
         // delete out path:
-        Path res = Paths.get(context.outPath.toString(), "*");
+        // Path res = Paths.get(context.outPath.toString(), "*");
         logger.info("output in:\n%s", context.outPath.toAbsolutePath());
-        logger.info("check result by:\nhead %s", res.toAbsolutePath());
+        // logger.info("check result by:\nhead %s", res.toAbsolutePath());
+        logger.info("check result by:\nhead %s", context.outPath.toAbsolutePath()+"/*");
         // FileUtils.deleteDirectory(context.outPath.toFile());
     }
 
